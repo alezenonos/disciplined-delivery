@@ -7,6 +7,6 @@
     "email": "ale_zenonos@hotmail.com"
   },
   "dependencies": [
-    "superpowers"
+    { "name": "superpowers", "marketplace": "superpowers-marketplace" }
   ]
 }

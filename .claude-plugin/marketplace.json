@@ -1,0 +1,18 @@
+{
+  "name": "alezenonos",
+  "description": "Plugins by alezenonos: disciplined delivery workflow and an agentic-app scaffolder.",
+  "owner": {
+    "name": "alezenonos",
+    "email": "ale_zenonos@hotmail.com"
+  },
+  "allowCrossMarketplaceDependenciesOn": [
+    "superpowers-marketplace"
+  ],
+  "plugins": [
+    {
+      "name": "disciplined-delivery",
+      "source": "./",
+      "description": "Ship work as small, test-first, human-reviewed increments, plus a scaffolder for greenfield agentic/RAG apps."
+    }
+  ]
+}
