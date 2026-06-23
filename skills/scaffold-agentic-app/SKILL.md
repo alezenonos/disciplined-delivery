@@ -27,10 +27,11 @@ one), throwaway spikes, or non-Python stacks.
 
 ## How to invoke
 
-Run the bundled generator, passing the target directory (defaults to `production-ai-app`):
+Run the bundled generator, passing the target directory (defaults to `production-ai-app`).
+The generator lives alongside this skill, so reference it via `${CLAUDE_SKILL_DIR}`:
 
 ```bash
-python scaffold-agentic-app/scaffold.py path/to/production-ai-app
+python "${CLAUDE_SKILL_DIR}/scaffold.py" path/to/production-ai-app
 ```
 
 It is **idempotent and safe**: existing files are skipped and reported, never overwritten.

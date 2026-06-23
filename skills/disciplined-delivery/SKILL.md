@@ -18,7 +18,7 @@ Ship work as **small, test-first, individually reviewable increments**, and let 
 
 Not for: throwaway spikes, or repos with no review process (still verify before claiming done).
 
-**Companion:** starting a brand-new agentic/RAG LLM app? Bootstrap the structure once with the `scaffold-agentic-app` skill, then return here and build every feature as a small, reviewed increment.
+**Companion:** starting a brand-new agentic/RAG LLM app? Bootstrap the structure once with the sibling `scaffold-agentic-app` skill (in this plugin, invoked as `/disciplined-delivery:scaffold-agentic-app`), then return here and build every feature as a small, reviewed increment.
 
 ## The loop (per change)
 
