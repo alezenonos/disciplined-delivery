@@ -1,0 +1,12 @@
+{
+  "name": "disciplined-delivery",
+  "version": "0.1.0",
+  "description": "Ship work as small, test-first, human-reviewed increments, plus a scaffolder for greenfield agentic/RAG apps.",
+  "author": {
+    "name": "alezenonos",
+    "email": "ale_zenonos@hotmail.com"
+  },
+  "dependencies": [
+    { "name": "superpowers", "marketplace": "superpowers-marketplace" }
+  ]
+}
