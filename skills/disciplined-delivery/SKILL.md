@@ -11,6 +11,13 @@ Ship work as **small, test-first, individually reviewable increments**, and let 
 
 **Core principle:** one focused change, proven green, presented for review — then ask before any git write.
 
+## Requires
+
+This skill leans on companion skills and does not reimplement them:
+
+- **`superpowers`** (obra) — declared as a plugin dependency in `plugin.json`, so Claude Code installs it automatically. Provides `brainstorming`, `writing-plans`, `test-driven-development`, and `verification-before-completion`, used in the loop below.
+- **`grill-me`** (mattpocock/skills) — a relentless interviewing skill that stress-tests load-bearing decisions. It ships via `skills.sh`, not as a Claude Code plugin, so it cannot be a machine-resolved `plugin.json` dependency. Install it once with `npx skills@latest add mattpocock/skills` (select `grill-me`).
+
 ## When to use
 
 - Implementing any feature, bugfix, refactor, or docs change.
@@ -22,7 +29,7 @@ Not for: throwaway spikes, or repos with no review process (still verify before 
 
 ## The loop (per change)
 
-1. **Think first.** Ambiguous goal or load-bearing decision? Ask / brainstorm before coding (**REQUIRED:** superpowers:brainstorming for non-trivial design; superpowers:writing-plans for multi-step work). Simplest thing that works — no speculative abstraction, no drive-by refactors.
+1. **Think first.** Ambiguous goal or load-bearing decision? Ask / brainstorm before coding (**REQUIRED:** superpowers:brainstorming for non-trivial design; superpowers:writing-plans for multi-step work; **grill-me** to stress-test any load-bearing decision before you commit to it). Simplest thing that works — no speculative abstraction, no drive-by refactors.
 2. **TDD, red-first** (**REQUIRED:** superpowers:test-driven-development). Watch the test fail for the right reason, then minimal code to green.
 3. **Verify** (**REQUIRED:** superpowers:verification-before-completion). Full test suite + linter green; the lines you touched are covered. Claim only what you actually ran.
 4. **Stop and ask.** Leave the result as uncommitted working-tree changes, summarise, and **ask before any git write** (branch / commit / push / PR). Reading, editing, and running tests need no permission; git-writes do.
@@ -41,7 +48,7 @@ Not for: throwaway spikes, or repos with no review process (still verify before 
 
 ## Decisions & docs
 
-- Grill the load-bearing choices before building; record **deferred/blocked** decisions as short ADRs (status *Proposed*, a recommendation as a *lean* not a verdict — the human decides).
+- Grill the load-bearing choices before building (use **grill-me**); record **deferred/blocked** decisions as short ADRs (status *Proposed*, a recommendation as a *lean* not a verdict — the human decides).
 - Living docs carry a **Created / Last-edited** header with a per-edit change-log. Reports are self-contained and claim only what is machine-verified; flag the rest for human review.
 
 ## Red flags — STOP

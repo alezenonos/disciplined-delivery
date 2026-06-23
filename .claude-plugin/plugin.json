@@ -5,5 +5,8 @@
   "author": {
     "name": "alezenonos",
     "email": "ale_zenonos@hotmail.com"
-  }
+  },
+  "dependencies": [
+    "superpowers"
+  ]
 }
