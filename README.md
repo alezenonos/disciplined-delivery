@@ -1,11 +1,46 @@
 # disciplined-delivery
 
+[![CI](https://github.com/alezenonos/disciplined-delivery/actions/workflows/ci.yml/badge.svg)](https://github.com/alezenonos/disciplined-delivery/actions/workflows/ci.yml)
+
 A Claude Code plugin with two skills:
 
 - **`disciplined-delivery`** — ship work as small, test-first, individually reviewable
   increments, with the human as the gate that commits and merges.
 - **`scaffold-agentic-app`** — one-shot scaffolder for a production RAG/agentic LLM app
   (Python + FastAPI) with light placeholder code.
+
+## How it works
+
+Install once, then let the skills drive the workflow: scaffold a new agentic/RAG app if you
+need a starting structure, then ship every change through the disciplined-delivery loop —
+plan/test via `superpowers`, keep CI green, hand the diff to a human, and leave a report.
+
+```mermaid
+flowchart TD
+    subgraph install["Install (once)"]
+      A1["Add marketplace: obra/superpowers-marketplace"] --> A2["Add marketplace: alezenonos/disciplined-delivery"]
+      A2 --> A3["plugin install disciplined-delivery@alezenonos<br/>(auto-pulls superpowers)"]
+      A3 --> A4["npx skills add mattpocock/skills -&gt; grill-me"]
+    end
+
+    install --> B{"Starting a new<br/>agentic / RAG app?"}
+    B -- Yes --> C["/disciplined-delivery:scaffold-agentic-app"]
+    C --> C1["Generates app skeleton:<br/>components, services, agent, eval, tracing"]
+    C1 --> D
+    B -- No --> D
+
+    subgraph loop["disciplined-delivery loop - per change"]
+      D["1. Think first<br/>brainstorm + plan via superpowers<br/>grill-me stress-tests decisions"] --> E["2. TDD red-first<br/>via superpowers"]
+      E --> F["3. Verify<br/>tests + lint + CI green"]
+      F --> G["4. Stop & ask<br/>before any git write"]
+    end
+
+    G --> H["Human reviews full diff<br/>PR follows PULL_REQUEST_TEMPLATE.md"]
+    H --> I{"Approved?"}
+    I -- "needs changes" --> D
+    I -- Yes --> J["Merge"]
+    J --> K["Write docs/reports/ entry<br/>decisions + outstanding items"]
+```
 
 ## Install
 
@@ -71,7 +106,32 @@ Claude also loads them automatically when a task matches their description.
 .claude-plugin/
   plugin.json         # plugin manifest + dependencies
   marketplace.json    # marketplace catalog (self-hosts this plugin)
+.github/
+  workflows/ci.yml    # CI: manifest validation + scaffold self-test
+  PULL_REQUEST_TEMPLATE.md
+scripts/
+  validate_manifests.py
 skills/
   disciplined-delivery/SKILL.md
   scaffold-agentic-app/SKILL.md  scaffold.py  references/structure.md
 ```
+
+## Development
+
+CI (`.github/workflows/ci.yml`) runs on every push and PR. Reproduce it locally:
+
+```bash
+# 1. Validate plugin/marketplace manifests and skill frontmatter
+python scripts/validate_manifests.py
+
+# 2. Authoritative manifest check (requires the Claude Code CLI)
+claude plugin validate .
+
+# 3. Scaffold generator self-test: generate, compile, prove idempotency, test
+python skills/scaffold-agentic-app/scaffold.py /tmp/app
+python -m compileall -q /tmp/app
+python skills/scaffold-agentic-app/scaffold.py /tmp/app   # re-run: created: 0 file(s)
+( cd /tmp/app && pip install -r requirements.txt && pytest -q )
+```
+
+A change is not done until CI is green on the branch.
