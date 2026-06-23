@@ -9,28 +9,52 @@ A Claude Code plugin with two skills:
 
 ## Install
 
-This plugin depends on obra's [`superpowers`](https://github.com/obra/superpowers) plugin,
-which lives in a different marketplace. Add that marketplace **first** so the dependency
-resolves automatically (a dependency from a marketplace you have not added is left
-unresolved):
+> **Pointing an AI agent (Claude Code) at this repo?** Tell it: *"Install the skills
+> from this repo following the README."* The four commands below, run in order, install
+> everything: this plugin's two skills, the `superpowers` dependency, and the `grill-me`
+> companion.
+
+### Quick install (one shot)
+
+From a checkout of this repo:
 
 ```bash
+./install.sh
+```
+
+It adds both marketplaces, installs the plugin (which auto-pulls `superpowers`), and prints
+the one remaining `grill-me` step.
+
+### Manual install
+
+Run inside Claude Code (slash commands) **or** in a terminal (prefix each with `claude `):
+
+```bash
+# 1. Add obra's marketplace FIRST — a dependency from a marketplace you have not
+#    added is left unresolved.
 /plugin marketplace add obra/superpowers-marketplace
+
+# 2. Add this marketplace and install the plugin. This auto-resolves and installs
+#    `superpowers` (cross-marketplace install is permitted by
+#    allowCrossMarketplaceDependenciesOn in this repo's marketplace.json).
 /plugin marketplace add alezenonos/disciplined-delivery
 /plugin install disciplined-delivery@alezenonos
-```
 
-Installing the plugin auto-resolves and installs `superpowers` (cross-marketplace install
-is permitted by `allowCrossMarketplaceDependenciesOn` in this repo's `marketplace.json`).
-
-### Also recommended: grill-me
-
-The `disciplined-delivery` skill uses the `grill-me` skill to stress-test load-bearing
-decisions. It ships via `skills.sh`, not as a Claude Code plugin, so install it separately:
-
-```bash
+# 3. Install the grill-me companion skill. It ships via skills.sh (not a Claude Code
+#    plugin), so it is a separate step:
 npx skills@latest add mattpocock/skills   # then select grill-me
 ```
+
+Terminal equivalents: `claude plugin marketplace add …` and `claude plugin install …`.
+
+### What gets installed
+
+| Component | Source | How |
+| --- | --- | --- |
+| `disciplined-delivery` skill | this repo | plugin install |
+| `scaffold-agentic-app` skill | this repo | plugin install |
+| `superpowers` (brainstorming, writing-plans, TDD, verification) | obra/superpowers-marketplace | auto-resolved dependency |
+| `grill-me` | mattpocock/skills (`skills.sh`) | `npx skills@latest add` |
 
 ## Skills
 

@@ -11,6 +11,8 @@ Ship work as **small, test-first, individually reviewable increments**, and let 
 
 **Core principle:** one focused change, proven green, presented for review — then ask before any git write.
 
+This skill does not reinvent planning or testing discipline: **planning and brainstorming run through the `superpowers` plugin** (`brainstorming`, `writing-plans`), and so does **test-driven development** (`test-driven-development`) and final verification (`verification-before-completion`). This skill orchestrates them and owns the review-gate discipline around them.
+
 ## Requires
 
 This skill leans on companion skills and does not reimplement them:
@@ -29,8 +31,8 @@ Not for: throwaway spikes, or repos with no review process (still verify before 
 
 ## The loop (per change)
 
-1. **Think first.** Ambiguous goal or load-bearing decision? Ask / brainstorm before coding (**REQUIRED:** superpowers:brainstorming for non-trivial design; superpowers:writing-plans for multi-step work; **grill-me** to stress-test any load-bearing decision before you commit to it). Simplest thing that works — no speculative abstraction, no drive-by refactors.
-2. **TDD, red-first** (**REQUIRED:** superpowers:test-driven-development). Watch the test fail for the right reason, then minimal code to green.
+1. **Think first — plan and brainstorm via `superpowers`.** Ambiguous goal or load-bearing decision? Before coding, brainstorm and plan using the **superpowers** plugin (**REQUIRED:** `superpowers:brainstorming` for non-trivial design; `superpowers:writing-plans` for multi-step work), and use **grill-me** to stress-test any load-bearing decision before you commit to it. Simplest thing that works — no speculative abstraction, no drive-by refactors.
+2. **TDD, red-first — via `superpowers`.** Drive the change test-first using the **superpowers** plugin's TDD discipline (**REQUIRED:** `superpowers:test-driven-development`). Watch the test fail for the right reason, then write the minimal code to green.
 3. **Verify** (**REQUIRED:** superpowers:verification-before-completion). Full test suite + linter green; the lines you touched are covered. Claim only what you actually ran.
 4. **Stop and ask.** Leave the result as uncommitted working-tree changes, summarise, and **ask before any git write** (branch / commit / push / PR). Reading, editing, and running tests need no permission; git-writes do.
 
