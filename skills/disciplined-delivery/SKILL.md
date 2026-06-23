@@ -62,6 +62,7 @@ Every repo this skill ships into is held to these — they are part of "done", n
 
 - Grill the load-bearing choices before building (use **grill-me**); record **deferred/blocked** decisions as short ADRs (status *Proposed*, a recommendation as a *lean* not a verdict — the human decides).
 - Living docs carry a **Created / Last-edited** header with a per-edit change-log. Reports are self-contained and claim only what is machine-verified; flag the rest for human review.
+- **Task reports.** Every task produces at least one report under `docs/reports/` (named `YYYY-MM-DD-<slug>.md`, from [`docs/reports/_TEMPLATE.md`](../../docs/reports/_TEMPLATE.md)). It is more elaborate than the PR description: the task, the **decision-making process** (options, choices, who decided), what was done, evidence, and **outstanding items** — enough that a collaborator can pick the work up cold. Be honest about what is not done.
 
 ## Red flags — STOP
 
