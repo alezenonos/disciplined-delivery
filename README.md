@@ -9,6 +9,39 @@ A Claude Code plugin with two skills:
 - **`scaffold-agentic-app`** — one-shot scaffolder for a production RAG/agentic LLM app
   (Python + FastAPI) with light placeholder code.
 
+## How it works
+
+Install once, then let the skills drive the workflow: scaffold a new agentic/RAG app if you
+need a starting structure, then ship every change through the disciplined-delivery loop —
+plan/test via `superpowers`, keep CI green, hand the diff to a human, and leave a report.
+
+```mermaid
+flowchart TD
+    subgraph install["Install (once)"]
+      A1["Add marketplace: obra/superpowers-marketplace"] --> A2["Add marketplace: alezenonos/disciplined-delivery"]
+      A2 --> A3["plugin install disciplined-delivery@alezenonos<br/>(auto-pulls superpowers)"]
+      A3 --> A4["npx skills add mattpocock/skills -&gt; grill-me"]
+    end
+
+    install --> B{"Starting a new<br/>agentic / RAG app?"}
+    B -- Yes --> C["/disciplined-delivery:scaffold-agentic-app"]
+    C --> C1["Generates app skeleton:<br/>components, services, agent, eval, tracing"]
+    C1 --> D
+    B -- No --> D
+
+    subgraph loop["disciplined-delivery loop - per change"]
+      D["1. Think first<br/>brainstorm + plan via superpowers<br/>grill-me stress-tests decisions"] --> E["2. TDD red-first<br/>via superpowers"]
+      E --> F["3. Verify<br/>tests + lint + CI green"]
+      F --> G["4. Stop & ask<br/>before any git write"]
+    end
+
+    G --> H["Human reviews full diff<br/>PR follows PULL_REQUEST_TEMPLATE.md"]
+    H --> I{"Approved?"}
+    I -- "needs changes" --> D
+    I -- Yes --> J["Merge"]
+    J --> K["Write docs/reports/ entry<br/>decisions + outstanding items"]
+```
+
 ## Install
 
 > **Pointing an AI agent (Claude Code) at this repo?** Tell it: *"Install the skills
