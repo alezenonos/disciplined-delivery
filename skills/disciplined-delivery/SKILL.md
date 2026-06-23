@@ -1,6 +1,6 @@
 ---
 name: disciplined-delivery
-description: Use when implementing a feature, bugfix, or change in a repo that ships work as small, human-reviewed pull requests — especially before committing, branching, pushing, or opening a PR.
+description: Use when implementing a change in a repo that ships work as small, human-reviewed pull requests — especially before committing, branching, pushing, or opening a PR.
 ---
 
 # Disciplined Delivery
@@ -18,7 +18,8 @@ This skill does not reinvent planning or testing discipline: **planning and brai
 This skill leans on companion skills and does not reimplement them:
 
 - **`superpowers`** (obra) — declared as a plugin dependency in `plugin.json`, so Claude Code installs it automatically. Provides `brainstorming`, `writing-plans`, `test-driven-development`, and `verification-before-completion`, used in the loop below.
-- **`grill-me`** (mattpocock/skills) — a relentless interviewing skill that stress-tests load-bearing decisions. It ships via `skills.sh`, not as a Claude Code plugin, so it cannot be a machine-resolved `plugin.json` dependency. Install it once with `npx skills@latest add mattpocock/skills` (select `grill-me`).
+- **`grill-with-docs`** (mattpocock/skills) — relentless design interrogation that stress-tests a plan against your domain model and captures the outcome as ADRs + a glossary (`CONTEXT.md`) as decisions crystallise. Ships via `skills.sh`, not as a plugin, so it cannot be a `plugin.json` dependency: install once with `npx skills@latest add mattpocock/skills` (select `grill-with-docs`).
+- **`code-review-skill`** (awesome-skills) — a structured, severity-labelled review (blocking / important / nit / suggestion) across many languages and frameworks. Run before opening a PR. Distributed as a bare skill, not a plugin, so install by cloning into your skills dir: `git clone https://github.com/awesome-skills/code-review-skill.git ~/.claude/skills/code-review-skill`.
 
 ## When to use
 
@@ -31,16 +32,16 @@ Not for: throwaway spikes, or repos with no review process (still verify before 
 
 ## The loop (per change)
 
-1. **Think first — plan and brainstorm via `superpowers`.** Ambiguous goal or load-bearing decision? Before coding, brainstorm and plan using the **superpowers** plugin (**REQUIRED:** `superpowers:brainstorming` for non-trivial design; `superpowers:writing-plans` for multi-step work), and use **grill-me** to stress-test any load-bearing decision before you commit to it. Simplest thing that works — no speculative abstraction, no drive-by refactors.
+1. **Think first — plan and brainstorm via `superpowers`.** Ambiguous goal or load-bearing decision? Before coding, brainstorm and plan using the **superpowers** plugin (**REQUIRED:** `superpowers:brainstorming` for non-trivial design; `superpowers:writing-plans` for multi-step work), and use **grill-with-docs** to stress-test any load-bearing decision before you commit to it. Simplest thing that works — no speculative abstraction, no drive-by refactors.
 2. **TDD, red-first — via `superpowers`.** Drive the change test-first using the **superpowers** plugin's TDD discipline (**REQUIRED:** `superpowers:test-driven-development`). Watch the test fail for the right reason, then write the minimal code to green.
 3. **Verify** (**REQUIRED:** superpowers:verification-before-completion). Full test suite + linter green **locally**, and the **CI pipeline green** on the pushed branch — local-only green is not "done". The lines you touched are covered. Claim only what you actually ran.
-4. **Stop and ask.** Leave the result as uncommitted working-tree changes, summarise, and **ask before any git write** (branch / commit / push / PR). Reading, editing, and running tests need no permission; git-writes do.
+4. **Stop and ask.** Leave the result as uncommitted working-tree changes, summarise, and **ask before any git write** (branch / commit / push / PR). Reading, editing, and running tests need no permission; git-writes do. When the human approves proceeding to a PR, **first run `code-review-skill` over the diff** and resolve every blocking/important finding before opening it.
 
 ## Branch & PR conventions
 
 - One branch = one focused change. Name it `feat/…`, `fix/…`, `chore/…`, `docs/…`, `test/…`; target the default branch.
 - **Avoid stacked PRs.** If a series is unavoidable, keep each off the default branch and merge **bottom-up**, letting the host retarget the next before merging it.
-- **The PR template is mandatory.** This repo uses [`.github/PULL_REQUEST_TEMPLATE.md`](../../.github/PULL_REQUEST_TEMPLATE.md) (adapted from obra/superpowers). Fill **every** section honestly — who submitted (model/harness/human reviewer), the real problem, what changed, whether it suits this plugin, **alternatives considered**, whether it bundles unrelated changes, existing-PR check, environment tested, **skill auto-trigger transcript** if you added/changed a skill, evaluation, the Rigor checkboxes, and the human-review checkbox. Blank sections, placeholder text, bundled changes, or no evidence of human review get the PR closed without review.
+- **The PR template is mandatory.** This repo uses [`.github/PULL_REQUEST_TEMPLATE.md`](../../.github/PULL_REQUEST_TEMPLATE.md) (adapted from obra/superpowers) — it is self-documenting; fill **every** section honestly. Blank sections, placeholder text, bundled changes, or no evidence of human review get the PR closed without review.
 - **Skills are code, not prose.** Changing a skill's behavior-shaping wording requires adversarial testing and eval evidence (use `superpowers:writing-skills`), per the template's Rigor section — not just a happy-path check.
 
 ## Commit hygiene
@@ -60,7 +61,7 @@ Every repo this skill ships into is held to these — they are part of "done", n
 
 ## Decisions & docs
 
-- Grill the load-bearing choices before building (use **grill-me**); record **deferred/blocked** decisions as short ADRs (status *Proposed*, a recommendation as a *lean* not a verdict — the human decides).
+- Grill the load-bearing choices before building (use **grill-with-docs**, which records them as ADRs + a glossary as you go); capture **deferred/blocked** decisions as short ADRs (status *Proposed*, a recommendation as a *lean* not a verdict — the human decides).
 - Living docs carry a **Created / Last-edited** header with a per-edit change-log. Reports are self-contained and claim only what is machine-verified; flag the rest for human review.
 - **Task reports.** Every task produces at least one report under `docs/reports/` (named `YYYY-MM-DD-<slug>.md`, from [`docs/reports/_TEMPLATE.md`](../../docs/reports/_TEMPLATE.md)). It is more elaborate than the PR description: the task, the **decision-making process** (options, choices, who decided), what was done, evidence, and **outstanding items** — enough that a collaborator can pick the work up cold. Be honest about what is not done.
 
