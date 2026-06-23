@@ -18,6 +18,8 @@ Ship work as **small, test-first, individually reviewable increments**, and let 
 
 Not for: throwaway spikes, or repos with no review process (still verify before claiming done).
 
+**Companion:** starting a brand-new agentic/RAG LLM app? Bootstrap the structure once with the `scaffold-agentic-app` skill, then return here and build every feature as a small, reviewed increment.
+
 ## The loop (per change)
 
 1. **Think first.** Ambiguous goal or load-bearing decision? Ask / brainstorm before coding (**REQUIRED:** superpowers:brainstorming for non-trivial design; superpowers:writing-plans for multi-step work). Simplest thing that works — no speculative abstraction, no drive-by refactors.
