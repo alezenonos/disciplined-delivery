@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  manifests:
+    name: Validate manifests & skills
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate plugin/marketplace manifests and skill frontmatter
+        run: python scripts/validate_manifests.py
+
+  scaffold:
+    name: Scaffold generator self-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Generate an app from the scaffold
+        run: python skills/scaffold-agentic-app/scaffold.py "$RUNNER_TEMP/app"
+      - name: Compile generated stubs
+        run: python -m compileall -q "$RUNNER_TEMP/app"
+      - name: Re-run must be idempotent (nothing overwritten)
+        run: |
+          python skills/scaffold-agentic-app/scaffold.py "$RUNNER_TEMP/app" | tee rerun.log
+          grep -q "created: 0 file(s)" rerun.log
+      - name: Install generated app deps and run its tests
+        run: |
+          cd "$RUNNER_TEMP/app"
+          pip install -r requirements.txt
+          pytest -q

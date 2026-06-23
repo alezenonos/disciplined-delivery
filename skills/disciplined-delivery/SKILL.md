@@ -33,7 +33,7 @@ Not for: throwaway spikes, or repos with no review process (still verify before 
 
 1. **Think first — plan and brainstorm via `superpowers`.** Ambiguous goal or load-bearing decision? Before coding, brainstorm and plan using the **superpowers** plugin (**REQUIRED:** `superpowers:brainstorming` for non-trivial design; `superpowers:writing-plans` for multi-step work), and use **grill-me** to stress-test any load-bearing decision before you commit to it. Simplest thing that works — no speculative abstraction, no drive-by refactors.
 2. **TDD, red-first — via `superpowers`.** Drive the change test-first using the **superpowers** plugin's TDD discipline (**REQUIRED:** `superpowers:test-driven-development`). Watch the test fail for the right reason, then write the minimal code to green.
-3. **Verify** (**REQUIRED:** superpowers:verification-before-completion). Full test suite + linter green; the lines you touched are covered. Claim only what you actually ran.
+3. **Verify** (**REQUIRED:** superpowers:verification-before-completion). Full test suite + linter green **locally**, and the **CI pipeline green** on the pushed branch — local-only green is not "done". The lines you touched are covered. Claim only what you actually ran.
 4. **Stop and ask.** Leave the result as uncommitted working-tree changes, summarise, and **ask before any git write** (branch / commit / push / PR). Reading, editing, and running tests need no permission; git-writes do.
 
 ## Branch & PR conventions
@@ -49,6 +49,14 @@ Not for: throwaway spikes, or repos with no review process (still verify before 
 - **Never put backticks or `$(…)` inside `git commit -m "…"` or `gh … --body "…"`** — the shell runs them as command substitution, mangling the message and possibly your environment. Use a quoted heredoc (`git commit -F - <<'EOF' … EOF`) or `--body-file`.
 - End with any required trailer (e.g. `Co-Authored-By:`).
 
+## Engineering standards
+
+Every repo this skill ships into is held to these — they are part of "done", not optional polish:
+
+- **A CI pipeline exists and gates merges.** There is a `.github/workflows/` (or equivalent) pipeline that runs the test suite, linter, and any project-specific validation (e.g. manifest/schema checks) on every push and PR. A change is not done until CI is **green** on the branch; a red or *absent* pipeline is a blocker, not a footnote. New repos without CI: add it as part of the first change.
+- **A professionally written README.** Clear and current: what the project is, how to install/run it, how to develop and test it (the exact commands CI runs), and the project layout. No stale instructions, no placeholder text. Update it in the same change that changes behavior.
+- **Documentation, including docstrings.** Public modules, classes, and functions carry docstrings that say what they do and why — not restatements of the signature. Non-obvious decisions get a comment or an ADR. Keep docs in sync with the code in the same commit; out-of-date docs are a bug.
+
 ## Decisions & docs
 
 - Grill the load-bearing choices before building (use **grill-me**); record **deferred/blocked** decisions as short ADRs (status *Proposed*, a recommendation as a *lean* not a verdict — the human decides).
@@ -59,7 +67,8 @@ Not for: throwaway spikes, or repos with no review process (still verify before 
 - About to commit / push / open a PR without asking.
 - Bundling unrelated changes into one PR.
 - "It's too small to test / template / ask."
-- Claiming "done", "passing", or "fixed" without having run it.
+- Claiming "done", "passing", or "fixed" without having run it — or while CI is red or missing.
+- Shipping code with no docstrings, or leaving the README stale after a behavior change.
 - Backticks inside a `-m`/`--body` string.
 
 Each of these means: stop, scope down, verify, and hand the gate back to the human.
