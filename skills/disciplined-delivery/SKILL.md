@@ -40,7 +40,8 @@ Not for: throwaway spikes, or repos with no review process (still verify before 
 
 - One branch = one focused change. Name it `feat/…`, `fix/…`, `chore/…`, `docs/…`, `test/…`; target the default branch.
 - **Avoid stacked PRs.** If a series is unavoidable, keep each off the default branch and merge **bottom-up**, letting the host retarget the next before merging it.
-- **If the repo has a PR template, it is mandatory.** Fill every section honestly: the real problem, what changed, **how it was tested** (the red→green evidence + suite/lint), **alternatives considered** (genuine ones), the single-focused-change checkbox, related PRs. A PR that skips the template gets rejected.
+- **The PR template is mandatory.** This repo uses [`.github/PULL_REQUEST_TEMPLATE.md`](../../.github/PULL_REQUEST_TEMPLATE.md) (adapted from obra/superpowers). Fill **every** section honestly — who submitted (model/harness/human reviewer), the real problem, what changed, whether it suits this plugin, **alternatives considered**, whether it bundles unrelated changes, existing-PR check, environment tested, **skill auto-trigger transcript** if you added/changed a skill, evaluation, the Rigor checkboxes, and the human-review checkbox. Blank sections, placeholder text, bundled changes, or no evidence of human review get the PR closed without review.
+- **Skills are code, not prose.** Changing a skill's behavior-shaping wording requires adversarial testing and eval evidence (use `superpowers:writing-skills`), per the template's Rigor section — not just a happy-path check.
 
 ## Commit hygiene
 
