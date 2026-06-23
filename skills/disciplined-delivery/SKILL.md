@@ -56,6 +56,7 @@ Every repo this skill ships into is held to these — they are part of "done", n
 - **A CI pipeline exists and gates merges.** There is a `.github/workflows/` (or equivalent) pipeline that runs the test suite, linter, and any project-specific validation (e.g. manifest/schema checks) on every push and PR. A change is not done until CI is **green** on the branch; a red or *absent* pipeline is a blocker, not a footnote. New repos without CI: add it as part of the first change.
 - **A professionally written README.** Clear and current: what the project is, how to install/run it, how to develop and test it (the exact commands CI runs), and the project layout. No stale instructions, no placeholder text. Update it in the same change that changes behavior.
 - **Documentation, including docstrings.** Public modules, classes, and functions carry docstrings that say what they do and why — not restatements of the signature. Non-obvious decisions get a comment or an ADR. Keep docs in sync with the code in the same commit; out-of-date docs are a bug.
+- **Project memory (`CLAUDE.md`).** Maintain a `CLAUDE.md` at the repo root holding agent instructions and project conventions (how to build/test, where things live, working principles). Keep it current as conventions change.
 
 ## Decisions & docs
 
