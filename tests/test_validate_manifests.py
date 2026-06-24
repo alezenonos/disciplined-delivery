@@ -43,3 +43,27 @@ def test_fails_on_broken_manifest_and_missing_frontmatter(tmp_path: Path) -> Non
     assert result.returncode == 1
     assert "missing required field 'name'" in result.stdout
     assert "missing YAML frontmatter" in result.stdout
+
+
+def test_flags_unallowlisted_cross_marketplace_dep(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    market = tmp_path / ".claude-plugin" / "marketplace.json"
+    data = json.loads(market.read_text())
+    data["allowCrossMarketplaceDependenciesOn"] = []  # drop the allowlist
+    market.write_text(json.dumps(data))
+
+    result = _run(tmp_path)
+    assert result.returncode == 1
+    assert "cross-marketplace install would be blocked" in result.stdout
+
+
+def test_flags_marketplace_not_offering_this_plugin(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    plugin_json = tmp_path / ".claude-plugin" / "plugin.json"
+    data = json.loads(plugin_json.read_text())
+    data["name"] = "renamed-plugin"  # marketplace no longer offers this name
+    plugin_json.write_text(json.dumps(data))
+
+    result = _run(tmp_path)
+    assert result.returncode == 1
+    assert "could not be installed from its own marketplace" in result.stdout
