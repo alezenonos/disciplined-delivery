@@ -20,7 +20,7 @@ flowchart TD
     subgraph install["Install (once)"]
       A1["Add marketplace: obra/superpowers-marketplace"] --> A2["Add marketplace: alezenonos/disciplined-delivery"]
       A2 --> A3["plugin install disciplined-delivery@alezenonos<br/>(auto-pulls superpowers)"]
-      A3 --> A4["npx skills add mattpocock/skills -&gt; grill-me"]
+      A3 --> A4["companions: grill-with-docs (skills.sh)<br/>+ code-review-skill (git clone)"]
     end
 
     install --> B{"Starting a new<br/>agentic / RAG app?"}
@@ -30,12 +30,13 @@ flowchart TD
     B -- No --> D
 
     subgraph loop["disciplined-delivery loop - per change"]
-      D["1. Think first<br/>brainstorm + plan via superpowers<br/>grill-me stress-tests decisions"] --> E["2. TDD red-first<br/>via superpowers"]
+      D["1. Think first<br/>brainstorm + plan via superpowers<br/>grill-with-docs stress-tests decisions"] --> E["2. TDD red-first<br/>via superpowers"]
       E --> F["3. Verify<br/>tests + lint + CI green"]
       F --> G["4. Stop & ask<br/>before any git write"]
     end
 
-    G --> H["Human reviews full diff<br/>PR follows PULL_REQUEST_TEMPLATE.md"]
+    G --> R["Code review the diff<br/>(code-review-skill)"]
+    R --> H["Human reviews full diff<br/>PR follows PULL_REQUEST_TEMPLATE.md"]
     H --> I{"Approved?"}
     I -- "needs changes" --> D
     I -- Yes --> J["Merge"]
@@ -45,9 +46,9 @@ flowchart TD
 ## Install
 
 > **Pointing an AI agent (Claude Code) at this repo?** Tell it: *"Install the skills
-> from this repo following the README."* The four commands below, run in order, install
-> everything: this plugin's two skills, the `superpowers` dependency, and the `grill-me`
-> companion.
+> from this repo following the README."* The commands below, run in order, install
+> everything: this plugin's two skills, the `superpowers` dependency, and the companion
+> skills (`grill-with-docs` and `code-review-skill`).
 
 ### Quick install (one shot)
 
@@ -58,7 +59,7 @@ From a checkout of this repo:
 ```
 
 It adds both marketplaces, installs the plugin (which auto-pulls `superpowers`), and prints
-the one remaining `grill-me` step.
+the remaining companion-skill steps.
 
 ### Manual install
 
@@ -75,9 +76,12 @@ Run inside Claude Code (slash commands) **or** in a terminal (prefix each with `
 /plugin marketplace add alezenonos/disciplined-delivery
 /plugin install disciplined-delivery@alezenonos
 
-# 3. Install the grill-me companion skill. It ships via skills.sh (not a Claude Code
-#    plugin), so it is a separate step:
-npx skills@latest add mattpocock/skills   # then select grill-me
+# 3. Install the grill-with-docs companion skill. It ships via skills.sh (not a Claude
+#    Code plugin), so it is a separate step:
+npx skills@latest add mattpocock/skills   # then select grill-with-docs
+
+# 4. Install the code-review-skill companion (a bare skill, installed by git clone):
+git clone https://github.com/awesome-skills/code-review-skill.git ~/.claude/skills/code-review-skill
 ```
 
 Terminal equivalents: `claude plugin marketplace add …` and `claude plugin install …`.
@@ -89,7 +93,8 @@ Terminal equivalents: `claude plugin marketplace add …` and `claude plugin ins
 | `disciplined-delivery` skill | this repo | plugin install |
 | `scaffold-agentic-app` skill | this repo | plugin install |
 | `superpowers` (brainstorming, writing-plans, TDD, verification) | obra/superpowers-marketplace | auto-resolved dependency |
-| `grill-me` | mattpocock/skills (`skills.sh`) | `npx skills@latest add` |
+| `grill-with-docs` | mattpocock/skills (`skills.sh`) | `npx skills@latest add` |
+| `code-review-skill` | awesome-skills (GitHub) | `git clone` into `~/.claude/skills/` |
 
 ## Skills
 
