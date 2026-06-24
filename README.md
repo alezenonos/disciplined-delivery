@@ -130,7 +130,7 @@ Claude also loads them automatically when a task matches their description.
 
 ```
 CLAUDE.md             # project memory + working principles (after Karpathy)
-README.md  LICENSE  install.sh
+README.md  LICENSE  CONTRIBUTING.md  CHANGELOG.md  install.sh
 pyproject.toml        # ruff + pytest config
 .claude-plugin/
   plugin.json         # plugin manifest + dependencies

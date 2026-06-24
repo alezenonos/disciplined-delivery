@@ -36,6 +36,20 @@ These live in one place each; read them, don't expect this file to restate them:
 Changing a skill's behavior-shaping wording requires adversarial testing and eval evidence
 (see the PR template's Rigor section), not just a happy-path check.
 
+## Releasing (maintainers)
+
+The project follows [Semantic Versioning](https://semver.org/) and keeps a
+[`CHANGELOG.md`](CHANGELOG.md). To cut a release:
+
+1. Move the `Unreleased` entries under a new `## [x.y.z] - YYYY-MM-DD` heading.
+2. Bump `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) to match.
+3. Tag and push using the marketplace convention `<plugin>--v<version>`:
+   ```bash
+   claude plugin tag --push        # creates disciplined-delivery--v<version>
+   ```
+   Consumers resolve versioned dependencies against these tags. Every user-facing change
+   should add a `CHANGELOG.md` entry under `Unreleased` in the same PR.
+
 ## License
 
 By contributing, you agree your contributions are licensed under the repo's [MIT License](LICENSE).
