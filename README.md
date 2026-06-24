@@ -145,8 +145,11 @@ pyproject.toml        # ruff + pytest config
   PULL_REQUEST_TEMPLATE.md
 docs/
   reports/            # one task report per change (_TEMPLATE.md + dated reports)
+evals/
+  cases/              # per-skill eval cases (triggers / negatives / expectations)
+  transcripts/        # recorded eval runs
 scripts/
-  validate_manifests.py
+  validate_manifests.py  check_evals.py
 skills/
   disciplined-delivery/SKILL.md
   scaffold-agentic-app/SKILL.md  scaffold.py  references/structure.md
@@ -168,8 +171,9 @@ pip install ruff pytest
 ruff check .
 pytest -q
 
-# 2. Validate plugin/marketplace manifests and skill frontmatter
+# 2. Validate plugin/marketplace manifests, skill frontmatter, and eval cases
 python scripts/validate_manifests.py
+python scripts/check_evals.py
 
 # 3. Authoritative manifest check (requires the Claude Code CLI)
 claude plugin validate .
@@ -182,3 +186,12 @@ python skills/scaffold-agentic-app/scaffold.py /tmp/app   # re-run: created: 0 f
 ```
 
 A change is not done until CI is green on the branch.
+
+## Evaluating skills
+
+Skills are behavior-shaping code, so they are evaluated. [`evals/`](evals/README.md) holds a
+case file per skill (the prompts that should auto-trigger it, the ones that shouldn't, and the
+behaviours to verify). CI gates the cases (`scripts/check_evals.py` — every skill must have one);
+running the cases against a live session and committing the transcript is a manual step, because
+auto-triggering can't be exercised in hermetic CI. Changing a skill's wording requires a fresh
+eval run.

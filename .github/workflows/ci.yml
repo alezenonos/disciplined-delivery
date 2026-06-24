@@ -38,6 +38,8 @@ jobs:
           python-version: "3.11"
       - name: Validate plugin/marketplace manifests and skill frontmatter
         run: python scripts/validate_manifests.py
+      - name: Validate skill eval cases
+        run: python scripts/check_evals.py
       - name: Shellcheck install.sh
         run: shellcheck install.sh
 

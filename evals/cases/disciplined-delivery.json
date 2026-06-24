@@ -1,0 +1,20 @@
+{
+  "skill": "disciplined-delivery",
+  "triggers": [
+    "Implement a small feature in this repo and open a PR",
+    "Fix this bug and commit the change",
+    "Add input validation to this function"
+  ],
+  "negatives": [
+    "What does this function return?",
+    "Explain how this module works"
+  ],
+  "expectations": [
+    "Plans/brainstorms before coding for non-trivial work (via the superpowers plugin)",
+    "Writes a failing test first, then the minimal code to green (TDD)",
+    "Keeps tests + linter + CI green before claiming done",
+    "Runs code-review-skill over the diff before opening a PR",
+    "Stops and asks before any git write (branch/commit/push/PR)",
+    "Fills the PR template and leaves a docs/reports entry"
+  ]
+}
