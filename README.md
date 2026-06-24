@@ -13,7 +13,8 @@ A Claude Code plugin with two skills:
 
 Install once, then let the skills drive the workflow: scaffold a new agentic/RAG app if you
 need a starting structure, then ship every change through the disciplined-delivery loop —
-plan/test via `superpowers`, keep CI green, hand the diff to a human, and leave a report.
+plan/test via `superpowers`, keep CI green, run `code-review-skill` over the diff, hand it to
+a human, and leave a `docs/reports/` entry.
 
 ```mermaid
 flowchart TD
@@ -108,12 +109,17 @@ Claude also loads them automatically when a task matches their description.
 ## Layout
 
 ```
+CLAUDE.md             # project memory + working principles (after Karpathy)
+README.md
+install.sh            # one-shot installer
 .claude-plugin/
   plugin.json         # plugin manifest + dependencies
   marketplace.json    # marketplace catalog (self-hosts this plugin)
 .github/
   workflows/ci.yml    # CI: manifest validation + scaffold self-test
   PULL_REQUEST_TEMPLATE.md
+docs/
+  reports/            # one task report per change (_TEMPLATE.md + dated reports)
 scripts/
   validate_manifests.py
 skills/
