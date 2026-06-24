@@ -97,6 +97,26 @@ Terminal equivalents: `claude plugin marketplace add …` and `claude plugin ins
 | `grill-with-docs` | mattpocock/skills (`skills.sh`) | `npx skills@latest add` |
 | `code-review-skill` | awesome-skills (GitHub) | `git clone` into `~/.claude/skills/` |
 
+### Verify your install
+
+Confirm it actually works after installing:
+
+```bash
+# Plugin + its dependency are installed and enabled
+claude plugin list                       # disciplined-delivery@alezenonos + superpowers, both enabled
+
+# Companion skills are present
+ls ~/.claude/skills/code-review-skill    # code-review-skill cloned
+npx skills@latest list                   # lists grill-with-docs
+
+# The bundled generator runs end to end
+claude plugin validate .                 # if developing from a checkout
+```
+
+In a Claude Code session, `/disciplined-delivery:disciplined-delivery` and
+`/disciplined-delivery:scaffold-agentic-app` should both autocomplete. If `superpowers` shows
+as unresolved, you skipped adding obra's marketplace first (see step 1).
+
 ## Skills
 
 Once installed, the skills are namespaced by the plugin:
@@ -110,13 +130,13 @@ Claude also loads them automatically when a task matches their description.
 
 ```
 CLAUDE.md             # project memory + working principles (after Karpathy)
-README.md
-install.sh            # one-shot installer
+README.md  LICENSE  install.sh
+pyproject.toml        # ruff + pytest config
 .claude-plugin/
   plugin.json         # plugin manifest + dependencies
   marketplace.json    # marketplace catalog (self-hosts this plugin)
 .github/
-  workflows/ci.yml    # CI: manifest validation + scaffold self-test
+  workflows/ci.yml    # CI: lint, unit tests, manifest validation, scaffold self-test
   PULL_REQUEST_TEMPLATE.md
 docs/
   reports/            # one task report per change (_TEMPLATE.md + dated reports)
@@ -125,6 +145,7 @@ scripts/
 skills/
   disciplined-delivery/SKILL.md
   scaffold-agentic-app/SKILL.md  scaffold.py  references/structure.md
+tests/                # unit tests for the generator + validator
 ```
 
 ## Development
@@ -132,13 +153,18 @@ skills/
 CI (`.github/workflows/ci.yml`) runs on every push and PR. Reproduce it locally:
 
 ```bash
-# 1. Validate plugin/marketplace manifests and skill frontmatter
+# 1. Lint and unit-test this repo's own tooling
+pip install ruff pytest
+ruff check .
+pytest -q
+
+# 2. Validate plugin/marketplace manifests and skill frontmatter
 python scripts/validate_manifests.py
 
-# 2. Authoritative manifest check (requires the Claude Code CLI)
+# 3. Authoritative manifest check (requires the Claude Code CLI)
 claude plugin validate .
 
-# 3. Scaffold generator self-test: generate, compile, prove idempotency, test
+# 4. Scaffold generator self-test: generate, compile, prove idempotency, test
 python skills/scaffold-agentic-app/scaffold.py /tmp/app
 python -m compileall -q /tmp/app
 python skills/scaffold-agentic-app/scaffold.py /tmp/app   # re-run: created: 0 file(s)

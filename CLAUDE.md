@@ -23,9 +23,12 @@ Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/S
   No bundled or unrelated changes in one PR.
 - **Every task leaves a report** under `docs/reports/` (from `_TEMPLATE.md`): decisions,
   what was done, evidence, and outstanding items for a collaborator.
+- **This repo dogfoods its own skill.** Changes here follow the `disciplined-delivery` loop —
+  including its tests-and-linter-green bar — not just downstream repos the skill is used on.
 - **A change is done only when CI is green** — not just locally. Reproduce CI before you
   claim done:
   ```bash
+  ruff check . && pytest -q                     # lint + unit tests (this repo's tooling)
   python scripts/validate_manifests.py        # manifests + skill frontmatter
   claude plugin validate .                     # authoritative manifest check
   python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
