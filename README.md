@@ -136,7 +136,8 @@ pyproject.toml        # ruff + pytest config
   plugin.json         # plugin manifest + dependencies
   marketplace.json    # marketplace catalog (self-hosts this plugin)
 .github/
-  workflows/ci.yml    # CI: lint, unit tests, manifest validation, scaffold self-test
+  workflows/ci.yml    # CI (Python 3.10-3.13 matrix; SHA-pinned actions)
+  dependabot.yml      # keeps the pinned actions current
   PULL_REQUEST_TEMPLATE.md
 docs/
   reports/            # one task report per change (_TEMPLATE.md + dated reports)
