@@ -1,7 +1,7 @@
 <!--
-BEFORE SUBMITTING: Read every word of this template. PRs that leave
-sections blank, contain multiple unrelated changes, or show no evidence
-of human involvement will be closed without review.
+BEFORE SUBMITTING: Read every word of this template, and CONTRIBUTING.md.
+PRs that leave sections blank, contain multiple unrelated changes, or show
+no evidence of human involvement will be closed without review.
 
 Adapted from obra/superpowers' PULL_REQUEST_TEMPLATE.md.
 -->

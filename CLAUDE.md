@@ -10,17 +10,25 @@ A Claude Code **plugin**, distributed via a self-hosted marketplace, shipping tw
 - **`scaffold-agentic-app`** — scaffold a production RAG/agentic app skeleton.
 
 Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/SKILL.md`,
-`scripts/`, `.github/` (CI workflow + PR template).
+`scripts/`, `docs/reports/` (one report per task), `.github/` (CI workflow + PR template).
 
 ## How to work here
 
 - **Follow the `disciplined-delivery` skill.** Small focused changes; plan/brainstorm and
-  drive TDD through the `superpowers` plugin; **stop and ask before any git write**.
+  drive TDD through the `superpowers` plugin; grill load-bearing decisions with
+  `grill-with-docs`; **stop and ask before any git write**.
+- **Before opening a PR, run `code-review-skill` over the diff** and resolve blocking/important
+  findings first.
 - **Every PR follows** [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md).
   No bundled or unrelated changes in one PR.
+- **Every task leaves a report** under `docs/reports/` (from `_TEMPLATE.md`): decisions,
+  what was done, evidence, and outstanding items for a collaborator.
+- **This repo dogfoods its own skill.** Changes here follow the `disciplined-delivery` loop —
+  including its tests-and-linter-green bar — not just downstream repos the skill is used on.
 - **A change is done only when CI is green** — not just locally. Reproduce CI before you
   claim done:
   ```bash
+  ruff check . && pytest -q                     # lint + unit tests (this repo's tooling)
   python scripts/validate_manifests.py        # manifests + skill frontmatter
   claude plugin validate .                     # authoritative manifest check
   python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
