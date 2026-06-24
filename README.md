@@ -117,6 +117,10 @@ In a Claude Code session, `/disciplined-delivery:disciplined-delivery` and
 `/disciplined-delivery:scaffold-agentic-app` should both autocomplete. If `superpowers` shows
 as unresolved, you skipped adding obra's marketplace first (see step 1).
 
+CI additionally runs a hermetic **install-consistency** check (`scripts/validate_manifests.py`):
+it confirms cross-marketplace dependencies are allow-listed and that the marketplace actually
+offers this plugin — the misconfigurations that would otherwise only surface at install time.
+
 ## Skills
 
 Once installed, the skills are namespaced by the plugin:

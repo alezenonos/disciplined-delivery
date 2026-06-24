@@ -92,6 +92,42 @@ def validate_skills(root: Path, errors: list[str]) -> None:
                 errors.append(f"{skill}: frontmatter missing '{key.rstrip(':')}'")
 
 
+def validate_install_consistency(root: Path, errors: list[str]) -> None:
+    """Cross-check the manifests so a fresh install actually resolves.
+
+    A hermetic stand-in for a live install smoke test (which needs the Claude
+    Code CLI + network). Catches the two common install-breakers:
+
+    1. a cross-marketplace dependency that isn't allow-listed, and
+    2. a self-hosting marketplace that doesn't actually offer this plugin.
+    """
+    plugin = _load_json(root / ".claude-plugin" / "plugin.json", [])
+    market = _load_json(root / ".claude-plugin" / "marketplace.json", [])
+    if not isinstance(plugin, dict) or not isinstance(market, dict):
+        return  # missing/invalid manifests are already reported by the validators above
+
+    market_name = market.get("name")
+    allowed = set(market.get("allowCrossMarketplaceDependenciesOn") or [])
+    for dep in plugin.get("dependencies", []):
+        if not isinstance(dep, dict):
+            continue  # a bare-string dep resolves in this marketplace; nothing to cross-check
+        dep_market = dep.get("marketplace")
+        if dep_market and dep_market != market_name and dep_market not in allowed:
+            errors.append(
+                f"install: dependency '{dep.get('name')}' resolves from marketplace "
+                f"'{dep_market}', not in allowCrossMarketplaceDependenciesOn "
+                f"{sorted(allowed)} — cross-marketplace install would be blocked"
+            )
+
+    plugin_name = plugin.get("name")
+    offered = {e.get("name") for e in market.get("plugins", []) if isinstance(e, dict)}
+    if plugin_name and plugin_name not in offered:
+        errors.append(
+            f"install: marketplace.json offers {sorted(n for n in offered if n)}, not this "
+            f"plugin '{plugin_name}' — it could not be installed from its own marketplace"
+        )
+
+
 def main(argv: list[str]) -> int:
     root = Path(argv[1]) if len(argv) > 1 else Path(__file__).resolve().parent.parent
     errors: list[str] = []
@@ -99,13 +135,14 @@ def main(argv: list[str]) -> int:
     validate_plugin(root, errors)
     validate_marketplace(root, errors)
     validate_skills(root, errors)
+    validate_install_consistency(root, errors)
 
     if errors:
         print(f"✗ {len(errors)} validation error(s):")
         for err in errors:
             print(f"  - {err}")
         return 1
-    print("✓ manifests and skill frontmatter are valid")
+    print("✓ manifests, skill frontmatter, and install consistency are valid")
     return 0
 
 
