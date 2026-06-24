@@ -84,3 +84,5 @@ idempotent re-run) ✓.
 ## Change log
 
 - 2026-06-24: created.
+- 2026-06-24: added `CONTRIBUTING.md` (rules bind every contributor, human or agent; points to
+  the skill / CLAUDE.md / PR template as single sources), linked from README and the PR template.

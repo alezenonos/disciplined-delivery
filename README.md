@@ -148,6 +148,11 @@ skills/
 tests/                # unit tests for the generator + validator
 ```
 
+## Contributing
+
+Anyone contributing — human or agent — follows the same rules; this repo dogfoods its own
+skill. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## Development
 
 CI (`.github/workflows/ci.yml`) runs on every push and PR. Reproduce it locally:
