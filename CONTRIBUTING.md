@@ -34,7 +34,10 @@ These live in one place each; read them, don't expect this file to restate them:
 ## Skills are code
 
 Changing a skill's behavior-shaping wording requires adversarial testing and eval evidence
-(see the PR template's Rigor section), not just a happy-path check.
+(see the PR template's Rigor section), not just a happy-path check. The eval harness lives in
+[`evals/`](evals/README.md): cases are validated in CI (`scripts/check_evals.py`), and adding a
+skill requires adding its `evals/cases/<skill>.json`. Run the cases and commit a transcript when
+you change a skill.
 
 ## Releasing (maintainers)
 

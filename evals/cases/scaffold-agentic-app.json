@@ -1,0 +1,17 @@
+{
+  "skill": "scaffold-agentic-app",
+  "triggers": [
+    "Scaffold a new agentic RAG app",
+    "Set up a production LLM project structure from scratch",
+    "Create the directory layout for a RAG service"
+  ],
+  "negatives": [
+    "Add a new endpoint to my existing app",
+    "Refactor the retriever in this project"
+  ],
+  "expectations": [
+    "Runs scaffold.py to generate the tree and never overwrites existing files",
+    "Targets a greenfield project only (declines for an existing codebase)",
+    "Hands off to disciplined-delivery for subsequent changes"
+  ]
+}

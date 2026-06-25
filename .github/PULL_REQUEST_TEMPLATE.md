@@ -81,7 +81,8 @@ Adapted from obra/superpowers' PULL_REQUEST_TEMPLATE.md.
          scaffold-agentic-app   -> "Scaffold a new agentic/RAG app"
 
      A working skill auto-triggers (loads without being named explicitly).
-     Paste the complete transcript below.
+     Paste the complete transcript below. See evals/README.md for the
+     procedure and evals/cases/<skill>.json for the prompts to run.
 
      These do NOT count and PRs that rely on them will be closed:
 
