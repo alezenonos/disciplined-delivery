@@ -11,6 +11,7 @@
   ],
   "expectations": [
     "Runs scaffold.py to generate the tree and never overwrites existing files",
+    "Appends its block under markers when CLAUDE.md/AGENTS.md already exists (never clobbers existing memory)",
     "Targets a greenfield project only (declines for an existing codebase)",
     "Hands off to disciplined-delivery for subsequent changes"
   ]
