@@ -11,20 +11,26 @@ reviewable increment" looks like end to end.
 |------|------|
 | `roman.py` | The library: `to_roman(number) -> str`, with range/type validation. |
 | `cli.py` | A one-argument CLI wrapper: `python cli.py 1954` → `MCMLIV`. |
-| `test_roman.py` | The pytest suite that drove the implementation. |
+| `test_roman.py` | The pytest suite that drove the library. |
+| `test_cli.py` | Tests for the CLI wrapper (added when coverage showed it was untested). |
 
 ## Run it
 
 ```bash
 cd examples/roman-numerals
 python cli.py 2024          # -> MMXXIV
-python -m pytest -q         # 23 passed
+python -m pytest -q         # 29 passed
 ruff check .                # clean
+
+# with the coverage gate CI enforces (100% of roman.py + cli.py):
+pip install pytest-cov
+python -m pytest -q --cov=roman --cov=cli --cov-report=term-missing --cov-fail-under=100
 ```
 
-> These tests are intentionally **not** wired into the repo's `pytest`
-> (`testpaths = ["tests"]`) — the example stays self-contained so it can't
-> affect the plugin's own CI. Run them with the command above.
+> The example stays out of the repo's own `pytest` (`testpaths = ["tests"]`)
+> so it can't perturb the plugin's unit tests, but CI **does** run this suite
+> as a dedicated step with the 100% coverage gate above — see
+> `.github/workflows/ci.yml`.
 
 ## How this followed the skill
 
@@ -34,8 +40,8 @@ ruff check .                # clean
   `ModuleNotFoundError: No module named 'roman'` before any implementation
   existed; the known-value, out-of-range, and non-int cases then drove
   `to_roman` to green.
-- **Verify.** Full suite green locally (23 passed) and `ruff check .` clean
-  across the whole repo.
+- **Verify.** Full suite green locally (29 passed, 100% line coverage of
+  `roman.py` + `cli.py`) and `ruff check .` clean across the whole repo.
 - **Docstrings + README.** Public function and module documented with *why*
   (the 1–3999 bound, the `bool` rejection), not a restatement of the signature.
 - **Stop and ask.** Built in the working tree and handed back for review
