@@ -148,6 +148,8 @@ docs/
 evals/
   cases/              # per-skill eval cases (triggers / negatives / expectations)
   transcripts/        # recorded eval runs
+examples/
+  roman-numerals/     # worked example of the disciplined-delivery loop (lib + CLI + tests)
 scripts/
   validate_manifests.py  check_evals.py
 skills/
