@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | Date | 2026-06-25 |
-| Branch | `claude/review-outstanding-items-u2soub` |
-| Status | Changes staged on branch; **not pushed** (awaiting go-ahead per the skill's git-write gate) |
+| Branch | Split into `chore/release-0.2.1` (PR 1) and `test/eval-scaffolds` (PR 2) |
+| Status | Reviewed (`code-review-skill`, no blocking findings) and opened as two focused PRs after human go-ahead |
 
 ## Why this task
 
@@ -73,9 +73,10 @@ assume.
 
 ## Outstanding / next steps
 
-1. **Push the branch and open a PR.** Note: this branch bundles three separable concerns
-   (release cut / transcript scaffolds / allowed-tools proposal). The methodology prefers one
-   PR each — split on request; they're separate commits to make that easy.
+1. **Review the two PRs and merge.** The work was split per the methodology: PR 1
+   (`chore/release-0.2.1`) is the release cut; PR 2 (`test/eval-scaffolds`) is the transcript
+   scaffolds + this report + the append-behaviour eval expectation. The `allowed-tools` proposal
+   stays review-only here, gated on the eval run (item 3).
 2. **Tag the release** from a normal environment once merged: `git tag disciplined-delivery--v0.2.1
    && git push origin disciplined-delivery--v0.2.1` (and backfill `--v0.2.0` if still missing).
 3. **Run the eval cases** in a clean session; fill the `*-pending.md` transcripts. This unblocks
@@ -85,3 +86,6 @@ assume.
 ## Change log
 
 - 2026-06-25: created.
+- 2026-06-25: ran `code-review-skill` over the diff (no blocking findings); added an
+  append-behaviour expectation to `scaffold-agentic-app` evals (covers the 0.2.1 feature); split
+  the work into two focused PRs and updated this report's header/outstanding accordingly.

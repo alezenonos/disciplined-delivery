@@ -36,6 +36,7 @@ For each `expectations` item, mark whether the behaviour was observed.
 | Expectation | Met? | Evidence (transcript excerpt) |
 |-------------|------|-------------------------------|
 | Runs scaffold.py to generate the tree and never overwrites existing files | yes / no | |
+| Appends its block under markers when CLAUDE.md/AGENTS.md already exists (never clobbers existing memory) | yes / no | |
 | Targets a greenfield project only (declines for an existing codebase) | yes / no | |
 | Hands off to disciplined-delivery for subsequent changes | yes / no | |
 
