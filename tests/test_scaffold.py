@@ -61,3 +61,37 @@ def test_rerun_is_idempotent(tmp_path: Path) -> None:
     second = _run(str(target))
     assert second.returncode == 0
     assert "created: 0 file(s)" in second.stdout
+
+
+def test_appends_to_existing_claude_md_without_clobbering(tmp_path: Path) -> None:
+    target = tmp_path / "app"
+    target.mkdir()
+    claude = target / "CLAUDE.md"
+    claude.write_text("# My project memory\nkeep me\n")
+
+    result = _run(str(target))
+    assert result.returncode == 0
+    text = claude.read_text()
+    assert "keep me" in text  # the project's own content is preserved
+    assert "BEGIN scaffold-agentic-app" in text  # our block is appended
+    assert "appended" in result.stdout
+
+
+def test_append_is_idempotent(tmp_path: Path) -> None:
+    target = tmp_path / "app"
+    target.mkdir()
+    (target / "CLAUDE.md").write_text("# mine\n")
+
+    _run(str(target))
+    after_first = (target / "CLAUDE.md").read_text()
+    _run(str(target))
+    after_second = (target / "CLAUDE.md").read_text()
+
+    assert after_first == after_second  # no second append
+    assert after_first.count("BEGIN scaffold-agentic-app") == 1
+
+
+def test_fresh_claude_md_carries_marker(tmp_path: Path) -> None:
+    target = tmp_path / "app"
+    _run(str(target))
+    assert "BEGIN scaffold-agentic-app" in (target / "CLAUDE.md").read_text()

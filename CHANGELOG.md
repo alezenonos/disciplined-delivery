@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Changed
+- `scaffold-agentic-app`: when the target already has a `CLAUDE.md`/`AGENTS.md`, the generator
+  now **appends** its block once (under markers) instead of skipping — a project's own memory is
+  preserved, never clobbered.
+
 ## [0.2.0] - 2026-06-25
 
 ### Added
