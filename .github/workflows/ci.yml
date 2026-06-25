@@ -25,8 +25,12 @@ jobs:
         run: pip install ruff pytest pytest-cov
       - name: Lint (ruff)
         run: ruff check .
-      - name: Unit tests (pytest)
-        run: pytest -q
+      - name: Unit tests (pytest) with coverage gate
+        # COVERAGE_PROCESS_START makes coverage instrument the subprocesses the
+        # tests spawn; the threshold lives in [tool.coverage.report] in pyproject.
+        env:
+          COVERAGE_PROCESS_START: ${{ github.workspace }}/pyproject.toml
+        run: pytest -q --cov --cov-report=term-missing
       - name: Example tests with coverage gate
         run: pytest -q --cov=roman --cov=cli --cov-report=term-missing --cov-fail-under=100
         working-directory: examples/roman-numerals
