@@ -10,7 +10,8 @@ A Claude Code **plugin**, distributed via a self-hosted marketplace, shipping tw
 - **`scaffold-agentic-app`** — scaffold a production RAG/agentic app skeleton.
 
 Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/SKILL.md`,
-`scripts/`, `docs/reports/` (one report per task), `.github/` (CI workflow + PR template).
+`scripts/`, `tests/`, `evals/` (skill eval cases), `docs/reports/` (one report per task),
+`.github/` (CI workflow + PR template).
 
 ## How to work here
 
@@ -29,7 +30,8 @@ Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/S
   claim done:
   ```bash
   ruff check . && pytest -q                     # lint + unit tests (this repo's tooling)
-  python scripts/validate_manifests.py        # manifests + skill frontmatter
+  python scripts/validate_manifests.py        # manifests + install consistency
+  python scripts/check_evals.py               # skill eval cases (every skill covered)
   claude plugin validate .                     # authoritative manifest check
   python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
   ( cd /tmp/app && pip install -r requirements.txt && pytest -q )
