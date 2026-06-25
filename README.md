@@ -168,10 +168,12 @@ skill. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 CI (`.github/workflows/ci.yml`) runs on every push and PR. Reproduce it locally:
 
 ```bash
-# 1. Lint and unit-test this repo's own tooling
-pip install ruff pytest
+# 1. Lint and unit-test this repo's own tooling (with the coverage gate CI enforces)
+pip install ruff pytest pytest-cov
 ruff check .
-pytest -q
+COVERAGE_PROCESS_START="$PWD/pyproject.toml" pytest -q --cov --cov-report=term-missing
+# threshold (fail_under) lives in [tool.coverage.report] in pyproject.toml;
+# COVERAGE_PROCESS_START is needed because the tests spawn subprocesses.
 
 # 2. Validate plugin/marketplace manifests, skill frontmatter, and eval cases
 python scripts/validate_manifests.py

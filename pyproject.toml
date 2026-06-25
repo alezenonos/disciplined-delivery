@@ -3,3 +3,16 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
+
+[tool.coverage.run]
+# The tests invoke the scripts/scaffold as subprocesses, so coverage must
+# instrument child processes too. `parallel` writes per-process data files that
+# pytest-cov then combines; CI exports COVERAGE_PROCESS_START=pyproject.toml so
+# the subprocess hook activates. `source` limits measurement to this repo's own
+# code (not the app the scaffold generates into a temp dir).
+parallel = true
+source = ["scripts", "skills/scaffold-agentic-app"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
