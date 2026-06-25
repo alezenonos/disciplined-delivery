@@ -22,11 +22,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dev tools
-        run: pip install ruff pytest
+        run: pip install ruff pytest pytest-cov
       - name: Lint (ruff)
         run: ruff check .
       - name: Unit tests (pytest)
         run: pytest -q
+      - name: Example tests with coverage gate
+        run: pytest -q --cov=roman --cov=cli --cov-report=term-missing --cov-fail-under=100
+        working-directory: examples/roman-numerals
 
   manifests:
     name: Validate manifests, skills & shell
