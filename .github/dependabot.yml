@@ -1,7 +1,13 @@
 version: 2
 updates:
-  # Keep the SHA-pinned GitHub Actions current (Dependabot bumps the pin + comment).
+  # Keep the SHA-pinned GitHub Actions current. Group every action bump into one
+  # weekly PR (instead of one PR per action) to cut review churn; CI gates the
+  # bumps, including majors.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns: ["*"]
