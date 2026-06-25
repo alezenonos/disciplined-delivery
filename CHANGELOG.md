@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-06-25
+
 ### Changed
 - `scaffold-agentic-app`: when the target already has a `CLAUDE.md`/`AGENTS.md`, the generator
   now **appends** its block once (under markers) instead of skipping — a project's own memory is
@@ -45,6 +47,7 @@ Initial release: the `disciplined-delivery` plugin and its companion scaffolder.
   principles after Karpathy), `.github/PULL_REQUEST_TEMPLATE.md`, the `docs/reports/`
   per-task convention, a usage diagram, `LICENSE` (MIT), `CONTRIBUTING.md`, and `.gitignore`.
 
-[Unreleased]: https://github.com/alezenonos/disciplined-delivery/compare/disciplined-delivery--v0.2.0...HEAD
+[Unreleased]: https://github.com/alezenonos/disciplined-delivery/compare/disciplined-delivery--v0.2.1...HEAD
+[0.2.1]: https://github.com/alezenonos/disciplined-delivery/compare/disciplined-delivery--v0.2.0...disciplined-delivery--v0.2.1
 [0.2.0]: https://github.com/alezenonos/disciplined-delivery/compare/disciplined-delivery--v0.1.0...disciplined-delivery--v0.2.0
 [0.1.0]: https://github.com/alezenonos/disciplined-delivery/releases/tag/disciplined-delivery--v0.1.0
