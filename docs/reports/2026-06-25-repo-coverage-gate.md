@@ -6,8 +6,8 @@
 | Last edited | 2026-06-25 |
 | Author | Claude Opus 4.8 (Claude Code) |
 | Human partner | ale_zenonos@hotmail.com |
-| Status | In progress (awaiting CI + human merge) |
-| Related | branch `ci/repo-coverage-gate`; follows merged PRs #19, #20, #21 |
+| Status | Done — merged in PR #22; badge intentionally skipped |
+| Related | PR #22 (merged); follows merged PRs #19, #20, #21 |
 
 ## Task
 
@@ -34,7 +34,7 @@ coverage does not see. The fix is coverage's documented subprocess support: set
 | Subprocess coverage | `COVERAGE_PROCESS_START` + parallel / refactor tests to in-process | Env + parallel | No test rewrite; coverage's standard mechanism; surgical | Agent |
 | Threshold | 88 (exact) / 85 (headroom) | 85 | Small headroom so trivial matrix differences don't flip the gate red, while still meaningful | Agent |
 | Config location | `.coveragerc` / `pyproject.toml` | `pyproject.toml` | The repo already centralises ruff + pytest config there | Agent |
-| Badge | in this PR / separate decision | Separate | Badge needs a third-party service (template discourages) or a CI commit-back; that's its own call | Agent |
+| Badge | add one / skip | Skip | Private repo (badge not publicly visible); the `fail_under=85` gate is the real signal; alternatives (third-party service / CI commit-back) not justified | Human |
 
 ## What was done
 
@@ -57,10 +57,12 @@ Not yet verified in CI across the 3.10–3.13 matrix — pending the PR run.
 
 ## Outstanding / next steps
 
-- **Coverage badge (the other half of the ask).** Options: (a) a third-party service
-  (Codecov/Coveralls) — discouraged by this repo's PR template and, on a private repo, not
-  publicly viewable; (b) a CI-generated SVG committed back to `main` (no third-party, but
-  adds a commit-back step + `contents: write`). Needs a human decision before implementing.
+- **Coverage badge (the other half of the ask) — decided: NOT added.** The human chose to
+  rely on the CI gate rather than add a badge. Rationale: the repo is private (a badge would
+  not render for logged-out viewers), and the build-enforced `fail_under = 85` gate is the
+  real coverage signal; the alternatives were a third-party service (discouraged by this
+  repo's PR template) or a CI commit-back step, neither justified for a private repo. No
+  follow-up needed.
 - Coverage of the example app stays a separate 100% gate (PR #21); this gate covers the
   repo's own tooling.
 
@@ -72,3 +74,4 @@ Not yet verified in CI across the 3.10–3.13 matrix — pending the PR run.
 ## Change log
 
 - 2026-06-25: created; repo-wide coverage measured (88%) and gated at 85% in CI.
+- 2026-06-25: merged as PR #22; recorded the human's decision to skip the coverage badge.
