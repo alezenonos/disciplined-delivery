@@ -41,6 +41,7 @@ def _check_case(path: Path, skills: set[str], errors: list[str]) -> str | None:
 
 
 def main(argv: list[str]) -> int:
+    """Validate every eval case and return ``0`` if all pass, ``1`` otherwise."""
     root = Path(argv[1]) if len(argv) > 1 else Path(__file__).resolve().parent.parent
     errors: list[str] = []
 

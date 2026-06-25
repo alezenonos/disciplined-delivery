@@ -159,7 +159,8 @@ FILES: dict[str, str] = {
         "# API reference\n\n"
         "## `POST /chat`\n"
         "Request: `ChatRequest` — `{ \"message\": str, \"session_id\": str | null }`.\n"
-        "Response: `ChatResponse` — `{ \"answer\": str, \"sources\": list, \"trace_id\": str }`.\n\n"
+        "Response: `ChatResponse` — "
+        "`{ \"answer\": str, \"sources\": list, \"trace_id\": str }`.\n\n"
         "## `GET /health`\n"
         "Liveness probe. Returns `{ \"status\": \"ok\" }`.\n\n"
         "TODO: document auth, rate limits, and error shapes.\n"
@@ -533,6 +534,7 @@ def scaffold(target: Path) -> int:
 
 
 def main(argv: list[str]) -> int:
+    """Scaffold into ``argv[1]`` (or the default dir) and return scaffold's exit code."""
     target = Path(argv[1]) if len(argv) > 1 else Path("production-ai-app")
     return scaffold(target)
 

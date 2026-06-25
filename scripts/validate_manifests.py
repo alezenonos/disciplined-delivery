@@ -129,6 +129,7 @@ def validate_install_consistency(root: Path, errors: list[str]) -> None:
 
 
 def main(argv: list[str]) -> int:
+    """Validate all manifests and return ``0`` if they are consistent, else ``1``."""
     root = Path(argv[1]) if len(argv) > 1 else Path(__file__).resolve().parent.parent
     errors: list[str] = []
 

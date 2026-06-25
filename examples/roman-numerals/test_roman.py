@@ -5,7 +5,6 @@ below was red before the matching line of `roman.to_roman` made it green.
 """
 
 import pytest
-
 from roman import to_roman
 
 

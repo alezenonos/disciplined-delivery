@@ -7,7 +7,6 @@ example's CLI is verified, not just its library.
 """
 
 import pytest
-
 from cli import main
 
 

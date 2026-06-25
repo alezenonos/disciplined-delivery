@@ -54,6 +54,7 @@ Not for: throwaway spikes, or repos with no review process (still verify before 
 
 Every repo this skill ships into is held to these — they are part of "done", not optional polish:
 
+- **Code quality & style.** Code follows the language's accepted style guide — for Python, **PEP-8** plus the **Google Python Style Guide** (naming, import order, docstring sections, line length). This is **enforced by the linter in CI**, not by reviewer taste: the linter config (e.g. `ruff` in `pyproject.toml`) *encodes* the standard so violations fail the build, and silencing the linter to get green is a red flag, not a fix. Beyond the rules, write the simplest correct code — small functions, clear names, no speculative abstraction (see the working principles in `CLAUDE.md`).
 - **A CI pipeline exists and gates merges.** There is a `.github/workflows/` (or equivalent) pipeline that runs the test suite, linter, and any project-specific validation (e.g. manifest/schema checks) on every push and PR. A change is not done until CI is **green** on the branch; a red or *absent* pipeline is a blocker, not a footnote. New repos without CI: add it as part of the first change.
 - **A professionally written README.** Clear and current: what the project is, how to install/run it, how to develop and test it (the exact commands CI runs), and the project layout. No stale instructions, no placeholder text. Update it in the same change that changes behavior.
 - **Documentation, including docstrings.** Public modules, classes, and functions carry docstrings that say what they do and why — not restatements of the signature. Non-obvious decisions get a comment or an ADR. Keep docs in sync with the code in the same commit; out-of-date docs are a bug.
@@ -72,6 +73,7 @@ Every repo this skill ships into is held to these — they are part of "done", n
 - "It's too small to test / template / ask."
 - Claiming "done", "passing", or "fixed" without having run it — or while CI is red or missing.
 - Shipping code with no docstrings, or leaving the README stale after a behavior change.
+- Silencing the linter (blanket `# noqa`, disabling rules) to go green instead of fixing the code or the style standard.
 - Backticks inside a `-m`/`--body` string.
 
 Each of these means: stop, scope down, verify, and hand the gate back to the human.
