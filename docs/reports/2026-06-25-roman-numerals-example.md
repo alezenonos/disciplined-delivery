@@ -6,8 +6,8 @@
 | Last edited | 2026-06-25 |
 | Author | Claude Opus 4.8 (Claude Code) |
 | Human partner | ale_zenonos@hotmail.com |
-| Status | In progress (awaiting human git-write approval) |
-| Related | branch `claude/skill-plugin-demo-app-4nxdg7`; files under `examples/roman-numerals/` |
+| Status | Complete (committed + pushed; code-reviewed) |
+| Related | branch `claude/skill-plugin-demo-app-4nxdg7`, commit `764229b`; files under `examples/roman-numerals/` |
 
 ## Task
 
@@ -58,18 +58,21 @@ All run locally on this branch:
 - Repo unaffected: `pytest -q` (repo) — 13 passed;
   `scripts/validate_manifests.py` and `scripts/check_evals.py` — both pass.
 
-Not yet verified in CI (no commit/push yet — see below).
+- Committed as `764229b` and pushed to `claude/skill-plugin-demo-app-4nxdg7`
+  (human approved the git write). The `code-review` skill was then run over
+  the diff: no correctness/cleanup findings; the only finding was this report
+  being stale on commit status, fixed here.
+
+Not yet verified in CI: pushing a feature branch does not trigger the workflow
+(it runs on `push` to `main` and on `pull_request`), and no PR is open yet.
 
 ## Outstanding / next steps
 
-- **Git writes pending human approval** — nothing has been committed or pushed,
-  per the skill's review-gate. Awaiting the go-ahead to commit
-  (`docs(examples): add roman-numerals disciplined-delivery walkthrough` or
-  similar) and push to `claude/skill-plugin-demo-app-4nxdg7`.
+- No PR has been opened (none requested). Opening one triggers the
+  `pull_request` workflow and is the point at which CI gives green evidence.
 - The example's tests are intentionally **not** in the repo's CI
   (`testpaths = ["tests"]`). If you want them gated, add a CI step running
   `pytest examples/roman-numerals` — flagged as a deliberate non-change.
-- Before any PR: run `code-review-skill` over the diff (per CLAUDE.md).
 
 ## References
 
@@ -79,3 +82,4 @@ Not yet verified in CI (no commit/push yet — see below).
 ## Change log
 
 - 2026-06-25: created; example built test-first and verified locally, awaiting git-write approval.
+- 2026-06-25: committed (`764229b`) + pushed; ran `code-review`, synced report to committed state.
