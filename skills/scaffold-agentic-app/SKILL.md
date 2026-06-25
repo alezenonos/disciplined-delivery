@@ -35,7 +35,10 @@ python "${CLAUDE_SKILL_DIR}/scaffold.py" path/to/production-ai-app
 ```
 
 It is **idempotent and safe**: existing files are skipped and reported, never overwritten.
-Re-running only fills in what is missing. Exit code is non-zero only on a real error.
+Re-running only fills in what is missing. The exception is project-memory files (`CLAUDE.md`,
+`AGENTS.md`): if one already exists, the generator **appends** its block once (under markers)
+rather than skipping, so a project's own memory is preserved. Exit code is non-zero only on a
+real error.
 
 ## What it produces
 

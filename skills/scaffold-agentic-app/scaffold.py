@@ -11,8 +11,11 @@ Usage:
 `target_dir` defaults to ``production-ai-app`` in the current directory.
 
 The generator is idempotent and safe: it never overwrites an existing file. Files
-that already exist are skipped and reported. Exit code is non-zero only on a real
-error (e.g. a path component collides with an existing file).
+that already exist are skipped and reported. The one exception is project-memory
+files (``CLAUDE.md``, ``AGENTS.md``): if one already exists, the generator appends
+its block once (under markers) instead of skipping, so a project's own memory is
+preserved, not clobbered. Exit code is non-zero only on a real error (e.g. a path
+component collides with an existing file).
 """
 from __future__ import annotations
 
@@ -472,9 +475,22 @@ FILES: dict[str, str] = {
 }
 
 
+# Project-memory files: if one already exists in the target, append our block
+# (once, idempotently) instead of skipping — never clobber a project's own.
+APPEND_IF_EXISTS = {"CLAUDE.md", "AGENTS.md"}
+_MARKER_BEGIN = "<!-- BEGIN scaffold-agentic-app -->"
+_MARKER_END = "<!-- END scaffold-agentic-app -->"
+
+
+def _scaffold_block(content: str) -> str:
+    """Wrap generated content in idempotency markers so re-runs don't duplicate it."""
+    return f"{_MARKER_BEGIN}\n{content.rstrip()}\n{_MARKER_END}\n"
+
+
 def scaffold(target: Path) -> int:
     """Create the project tree under ``target``. Returns a process exit code."""
     created: list[str] = []
+    appended: list[str] = []
     skipped: list[str] = []
 
     for rel, content in FILES.items():
@@ -484,6 +500,21 @@ def scaffold(target: Path) -> int:
         except FileExistsError:
             print(f"ERROR: {path.parent} is not a directory; cannot scaffold here.")
             return 1
+
+        if rel in APPEND_IF_EXISTS:
+            block = _scaffold_block(content)
+            if not path.exists():
+                path.write_text(block, encoding="utf-8")
+                created.append(rel)
+            elif _MARKER_BEGIN in path.read_text(encoding="utf-8"):
+                skipped.append(rel)  # our block is already present
+            else:
+                existing = path.read_text(encoding="utf-8")
+                sep = "\n" if existing.endswith("\n") else "\n\n"
+                path.write_text(existing + sep + block, encoding="utf-8")
+                appended.append(rel)
+            continue
+
         if path.exists():
             skipped.append(rel)
             continue
@@ -492,10 +523,12 @@ def scaffold(target: Path) -> int:
 
     print(f"Scaffolded into: {target}")
     print(f"  created: {len(created)} file(s)")
+    print(f"  appended to: {len(appended)} existing file(s)")
     print(f"  skipped: {len(skipped)} existing file(s)")
-    if skipped:
-        for rel in skipped:
-            print(f"    - skipped {rel}")
+    for rel in appended:
+        print(f"    - appended to {rel}")
+    for rel in skipped:
+        print(f"    - skipped {rel}")
     return 0
 
 
