@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-07-18
+
+### Changed
+- The `superpowers` dependency now resolves from the **official plugin marketplace**
+  (`claude-plugins-official`) instead of the legacy `superpowers-marketplace`, which
+  stopped receiving updates in June (5.1.0) after superpowers moved to the official
+  marketplace (6.x). Unpins consumers from a stale duplicate install.
+
 ## [0.2.1] - 2026-06-25
 
 ### Changed

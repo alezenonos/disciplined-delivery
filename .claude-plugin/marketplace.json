@@ -6,7 +6,7 @@
     "email": "ale_zenonos@hotmail.com"
   },
   "allowCrossMarketplaceDependenciesOn": [
-    "superpowers-marketplace"
+    "claude-plugins-official"
   ],
   "plugins": [
     {
