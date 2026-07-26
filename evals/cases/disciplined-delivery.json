@@ -3,7 +3,10 @@
   "triggers": [
     "Implement a small feature in this repo and open a PR",
     "Fix this bug and commit the change",
-    "Add input validation to this function"
+    "Add input validation to this function",
+    "Move this hardcoded timeout into a config file",
+    "The checklist says this guard is missing — please build it",
+    "Our board says this is done but I am not sure — reconcile it with the docs"
   ],
   "negatives": [
     "What does this function return?",
@@ -11,10 +14,22 @@
   ],
   "expectations": [
     "Plans/brainstorms before coding for non-trivial work (via the superpowers plugin)",
+    "Checks the code before building something a doc or checklist claims is missing",
     "Writes a failing test first, then the minimal code to green (TDD)",
     "Keeps tests + linter + CI green before claiming done",
+    "Reviews the deployment surface — container COPY, compose/orchestration env defaults, packaging manifest, CI — not just the diff's logic",
+    "Reads the installed source of a third-party library when relying on its default behaviour, and names what the test doubles cannot cover",
     "Runs code-review-skill over the diff before opening a PR",
-    "Stops and asks before any git write (branch/commit/push/PR)",
-    "Fills the PR template and leaves a docs/reports entry"
+    "Verifies each review finding against the code before implementing it, and records anything deferred",
+    "Discloses in the PR when no independent review was possible instead of self-reviewing silently",
+    "Refuses to add a config key, flag or option that nothing reads",
+    "Pins the wiring rather than the value when moving a constant into config, and writes no constant-vs-literal tautology tests",
+    "Re-runs the behavioural eval and states the result when prompts, domain rules or model choice change",
+    "Stops and asks before any git write (branch/commit/push/PR) or other outward-visible action such as posting to a tracker",
+    "Fills the PR template; writes a docs/reports entry for decision-shaped or M/L work, not for one-line changes",
+    "Treats vendor- or partner-owned contracts/specs as read-only, raising changes with the owner instead of editing locally",
+    "Verifies a pinned external identifier (model slug, image tag, API version) is still live, and prefers an auto-resolving default",
+    "States the nearest contradicting measurement when a number justifies a design choice",
+    "Reconciles tracker and docs in both directions, saying which way each item moved"
   ]
 }

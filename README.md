@@ -13,8 +13,8 @@ A Claude Code plugin with two skills:
 
 Install once, then let the skills drive the workflow: scaffold a new agentic/RAG app if you
 need a starting structure, then ship every change through the disciplined-delivery loop —
-plan/test via `superpowers`, keep CI green, run `code-review-skill` over the diff, hand it to
-a human, and leave a `docs/reports/` entry.
+plan/test via `superpowers`, keep CI green, review the whole surface (not just the diff), run
+`code-review-skill` over it, and hand it to a human.
 
 ```mermaid
 flowchart TD
@@ -31,9 +31,11 @@ flowchart TD
     B -- No --> D
 
     subgraph loop["disciplined-delivery loop - per change"]
-      D["1. Think first<br/>brainstorm + plan via superpowers<br/>grill-with-docs stress-tests decisions"] --> E["2. TDD red-first<br/>via superpowers"]
-      E --> F["3. Verify<br/>tests + lint + CI green"]
-      F --> G["4. Stop & ask<br/>before any git write"]
+      D["1. Think first<br/>brainstorm + plan via superpowers<br/>grill-with-docs stress-tests decisions"] --> D2["2. Ground truth in code<br/>grep before trusting a doc"]
+      D2 --> E["3. TDD red-first<br/>via superpowers"]
+      E --> F["4. Verify<br/>tests + lint + CI green"]
+      F --> F2["5. Review the whole surface<br/>deployment paths + library defaults"]
+      F2 --> G["6. Stop & ask<br/>before any outward-visible action"]
     end
 
     G --> R["Code review the diff<br/>(code-review-skill)"]
@@ -41,7 +43,7 @@ flowchart TD
     H --> I{"Approved?"}
     I -- "needs changes" --> D
     I -- Yes --> J["Merge"]
-    J --> K["Write docs/reports/ entry<br/>decisions + outstanding items"]
+    J --> K["docs/reports/ entry<br/>for decision-shaped or M/L work"]
 ```
 
 ## Install

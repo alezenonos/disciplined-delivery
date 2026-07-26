@@ -6,6 +6,41 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+- `disciplined-delivery`: **"Review the whole surface"** — review the deployment paths a change
+  ships through (container `COPY`, compose/orchestration env defaults, packaging manifest, CI),
+  not just the diff's logic; read a third-party library's installed source when relying on its
+  defaults; name what test doubles structurally cannot cover; and disclose in the PR when no
+  independent review was possible rather than self-reviewing silently.
+- `disciplined-delivery`: **"Receiving review findings"** — verify each finding against the code
+  before acting (via `superpowers:receiving-code-review`), fix the cause rather than the symptom,
+  record what was deferred and why, and cite the observation that contradicts your own choice.
+- `disciplined-delivery`: **"Behaviour-shaping changes (LLM apps)"** — re-run the behavioural eval
+  and state the result when prompts, domain rules or model choice change; keep the prompt in
+  configuration composed fail-fast; separate the domain-owned and engineering-owned lanes.
+- `disciplined-delivery`: loop step **"Establish the ground truth in code"** — grep before building
+  something a doc, checklist or ticket claims is missing.
+- `disciplined-delivery`: engineering standards for **tests that can fail** (no constant-vs-literal
+  tautologies; pin the wiring, not the value), **fail-fast configuration with no dead knobs**
+  (unknown keys rejected; never add an option nothing reads), **rot-prone external pins**, and
+  **read-only vendor/partner-owned inputs**.
+
+### Changed
+- `disciplined-delivery`: the **ask-before-writing gate now covers every outward-visible action**
+  — posting to a tracker, commenting, messaging, deploying — not only git writes.
+- `disciplined-delivery`: **task reports are now scaled to the task.** Decision-shaped and M/L work
+  still gets a `docs/reports/` entry; for XS/S changes a well-filled PR description is the report.
+  Sizing is defined inline (XS/S = one file, no interface change) so the relaxation cannot be used
+  as an escape hatch. The previous "every task produces a report" rule was heavier than practice
+  and was being ignored, which is worse than a smaller rule that is followed.
+- `disciplined-delivery`: **reconcile the tracker and the docs in both directions** — expect to
+  learn in both, and say which way each item moved.
+- `disciplined-delivery`: dated reports are called out as **immutable snapshots** — a later finding
+  patches the planning doc (dated) rather than rewriting the snapshot.
+- `disciplined-delivery`: the PR-template reference now points at **the consuming repo's**
+  `.github/PULL_REQUEST_TEMPLATE.md` instead of a relative path that resolved to this plugin's own
+  copy once installed elsewhere.
+
 ## [0.2.2] - 2026-07-18
 
 ### Changed

@@ -10,7 +10,9 @@ These live in one place each; read them, don't expect this file to restate them:
 
 - **The loop and review-gate discipline:** [`skills/disciplined-delivery/SKILL.md`](skills/disciplined-delivery/SKILL.md)
   — think first (plan/brainstorm via `superpowers`; grill load-bearing decisions with
-  `grill-with-docs`), TDD red-first, verify, then stop and ask before any git write.
+  `grill-with-docs`), establish ground truth in the code, TDD red-first, verify, review the
+  whole surface (deployment paths, library defaults), then stop and ask before any git write or
+  other outward-visible action.
 - **Project conventions + working principles:** [`CLAUDE.md`](CLAUDE.md).
 - **The PR template (mandatory, every section honest):** [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md).
 
@@ -25,8 +27,9 @@ These live in one place each; read them, don't expect this file to restate them:
    python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
    ```
 3. **Run `code-review-skill` over the diff** and resolve blocking/important findings.
-4. **Leave a task report** under [`docs/reports/`](docs/reports/) (from `_TEMPLATE.md`):
-   decisions, what changed, evidence, outstanding items.
+4. **Leave a task report** under [`docs/reports/`](docs/reports/) (from `_TEMPLATE.md`) for
+   decision-shaped or M/L work: decisions, what changed, evidence, outstanding items. For an
+   XS/S change, a well-filled PR description is the report.
 5. **Fill the PR template** honestly. Blank sections, placeholder text, bundled changes, or no
    evidence of human review get the PR closed without review.
 6. **CI must be green** on the branch — local-only green is not "done".
