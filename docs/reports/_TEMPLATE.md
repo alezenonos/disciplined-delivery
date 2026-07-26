@@ -1,6 +1,7 @@
 <!--
 Copy this file to docs/reports/YYYY-MM-DD-<slug>.md and fill it in.
-One report per Claude task. More elaborate than the PR description: it
+One report per decision-shaped or M/L task (XS/S changes: the PR description is
+the report). More elaborate than the PR description: it
 captures the reasoning and the handoff, not just the diff. Be honest —
 claim only what was actually run, and be explicit about what is NOT done.
 -->

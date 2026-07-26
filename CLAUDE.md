@@ -10,20 +10,23 @@ A Claude Code **plugin**, distributed via a self-hosted marketplace, shipping tw
 - **`scaffold-agentic-app`** — scaffold a production RAG/agentic app skeleton.
 
 Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/SKILL.md`,
-`scripts/`, `tests/`, `evals/` (skill eval cases), `docs/reports/` (one report per task),
+`scripts/`, `tests/`, `evals/` (skill eval cases), `docs/reports/` (reports for decision-shaped / M-L work),
 `.github/` (CI workflow + PR template).
 
 ## How to work here
 
 - **Follow the `disciplined-delivery` skill.** Small focused changes; plan/brainstorm and
   drive TDD through the `superpowers` plugin; grill load-bearing decisions with
-  `grill-with-docs`; **stop and ask before any git write**.
+  `grill-with-docs`; **stop and ask before any git write — or any other
+  outward-visible action** (tracker post, comment, message, deploy).
 - **Before opening a PR, run `code-review-skill` over the diff** and resolve blocking/important
   findings first.
 - **Every PR follows** [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md).
   No bundled or unrelated changes in one PR.
-- **Every task leaves a report** under `docs/reports/` (from `_TEMPLATE.md`): decisions,
-  what was done, evidence, and outstanding items for a collaborator.
+- **Decision-shaped and M/L tasks leave a report** under `docs/reports/` (from
+  `_TEMPLATE.md`): decisions, what was done, evidence, and outstanding items for a
+  collaborator. For XS/S changes a well-filled PR description is the report — don't
+  manufacture ceremony for a one-line change.
 - **This repo dogfoods its own skill.** Changes here follow the `disciplined-delivery` loop —
   including its tests-and-linter-green bar — not just downstream repos the skill is used on.
 - **A change is done only when CI is green** — not just locally. Reproduce CI before you
