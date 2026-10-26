@@ -30,15 +30,17 @@ Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/S
 - **This repo dogfoods its own skill.** Changes here follow the `disciplined-delivery` loop —
   including its tests-and-linter-green bar — not just downstream repos the skill is used on.
 - **A change is done only when CI is green** — not just locally. Reproduce CI before you
-  claim done:
+  claim done, **on a clean checkout of the commit, never the working tree**, and name the SHA
+  in the PR:
   ```bash
-  ruff check . && pytest -q                     # lint + unit tests (this repo's tooling)
-  python scripts/validate_manifests.py        # manifests + install consistency
-  python scripts/check_evals.py               # skill eval cases (every skill covered)
+  scripts/ci_local.sh --merge-preview         # ruff, pytest + coverage gate, manifests, evals,
+                                              # scaffold — in a temp checkout of HEAD merged with main
   claude plugin validate .                     # authoritative manifest check
   python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
   ( cd /tmp/app && pip install -r requirements.txt && pytest -q )
   ```
+  The individual commands are in `README.md` § Development. The PR description is checked in
+  CI against the template by the checker this plugin ships (`.github/workflows/pr-template.yml`).
 - **Docs stay in sync.** Public modules, classes, and functions carry docstrings; update the
   README in the same change that changes behavior.
 

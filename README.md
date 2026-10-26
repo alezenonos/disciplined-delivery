@@ -13,8 +13,11 @@ A Claude Code plugin with two skills:
 
 Install once, then let the skills drive the workflow: scaffold a new agentic/RAG app if you
 need a starting structure, then ship every change through the disciplined-delivery loop —
-plan/test via `superpowers`, keep CI green, review the whole surface (not just the diff), run
-`code-review-skill` over it, and hand it to a human.
+plan/test via `superpowers`, prove it green on a clean checkout of the exact commit, review
+the whole surface (not just the diff), run `code-review-skill` over it, and hand it to a human.
+The skill also ships the mechanisms that enforce its rules (a PR template with a CI checker,
+and a clean-checkout local CI runner) ready to copy into any repo — see
+[Adopting it in your repo](#adopting-it-in-your-repo).
 
 ```mermaid
 flowchart TD
@@ -32,9 +35,9 @@ flowchart TD
 
     subgraph loop["disciplined-delivery loop - per change"]
       D["1. Think first<br/>brainstorm + plan via superpowers<br/>grill-with-docs stress-tests decisions"] --> D2["2. Ground truth in code<br/>grep before trusting a doc"]
-      D2 --> E["3. TDD red-first<br/>via superpowers"]
-      E --> F["4. Verify<br/>tests + lint + CI green"]
-      F --> F2["5. Review the whole surface<br/>deployment paths + library defaults"]
+      D2 --> E["3. TDD red-first<br/>via superpowers; mutation-check<br/>a test that passes at once"]
+      E --> F["4. Verify<br/>tests + lint on a clean checkout<br/>of the commit; CI green"]
+      F --> F2["5. Review the whole surface<br/>deployment paths, library defaults,<br/>every path a guard must reach"]
       F2 --> G["6. Stop & ask<br/>before any outward-visible action"]
     end
 
@@ -132,6 +135,21 @@ Once installed, the skills are namespaced by the plugin:
 
 Claude also loads them automatically when a task matches their description.
 
+## Adopting it in your repo
+
+The skill's rules are backed by mechanisms, because a rule that only people remember is not
+enforced. Copy them from `skills/disciplined-delivery/assets/` (the skill tells Claude to):
+
+| Asset | Copy to | What it enforces |
+| --- | --- | --- |
+| `PULL_REQUEST_TEMPLATE.md` | `.github/PULL_REQUEST_TEMPLATE.md` | problem, change, how tested (naming the commit), alternatives, known limits, single-change attestation, review boxes for behaviour-shaping and shipped changes |
+| `check_pr_template.py` + `pr-template.yml` | `.github/scripts/` + `.github/workflows/` | the PR description follows the template: every section present, prose sections filled, the single-change box ticked. Rules are read from the template, so edit the template, not the script |
+| `ci_local.sh` | wrap as `scripts/ci_local.sh` with the exact commands CI runs | the checks run on a clean checkout of the commit, never the working tree; `--merge-preview` tests the merge with the base; the SHA tested is printed for the PR body |
+
+The reasoning behind every gate, with what it caught and what it costs, is in
+`skills/disciplined-delivery/references/gates.md`; the rules for measuring and recording
+evidence in `references/evidence.md`. This repo uses all three assets on itself.
+
 ## Layout
 
 ```
@@ -143,6 +161,7 @@ pyproject.toml        # ruff + pytest config
   marketplace.json    # marketplace catalog (self-hosts this plugin)
 .github/
   workflows/ci.yml    # CI (Python 3.10-3.13 matrix; SHA-pinned actions)
+  workflows/pr-template.yml  # PR description checked against the template (the shipped checker)
   dependabot.yml      # keeps the pinned actions current
   PULL_REQUEST_TEMPLATE.md
 docs/
@@ -154,10 +173,15 @@ examples/
   roman-numerals/     # worked example of the disciplined-delivery loop (lib + CLI + tests)
 scripts/
   validate_manifests.py  check_evals.py
+  ci_local.sh         # CI's checks on a clean checkout of HEAD (wraps the shipped runner)
 skills/
-  disciplined-delivery/SKILL.md
+  disciplined-delivery/
+    SKILL.md
+    references/gates.md  evidence.md   # what each gate caught and costs; evidence norms
+    assets/             # PULL_REQUEST_TEMPLATE.md, check_pr_template.py, pr-template.yml,
+                        # ci_local.sh — copy into a consuming repo
   scaffold-agentic-app/SKILL.md  scaffold.py  references/structure.md
-tests/                # unit tests for the generator + validator
+tests/                # unit tests for the generator, validators and shipped assets
 ```
 
 ## Contributing
@@ -167,7 +191,15 @@ skill. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Development
 
-CI (`.github/workflows/ci.yml`) runs on every push and PR. Reproduce it locally:
+CI (`.github/workflows/ci.yml`) runs on every push and PR. Reproduce it locally on a **clean
+checkout of the commit** (the working tree does not count; quote the SHA it prints in the PR):
+
+```bash
+pip install ruff pytest pytest-cov
+scripts/ci_local.sh --merge-preview   # steps 1-2 below, in a temp checkout of HEAD merged with origin/main
+```
+
+The individual steps:
 
 ```bash
 # 1. Lint and unit-test this repo's own tooling (with the coverage gate CI enforces)

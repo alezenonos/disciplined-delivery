@@ -26,7 +26,7 @@ convention = "google"
 # the subprocess hook activates. `source` limits measurement to this repo's own
 # code (not the app the scaffold generates into a temp dir).
 parallel = true
-source = ["scripts", "skills/scaffold-agentic-app"]
+source = ["scripts", "skills/scaffold-agentic-app", "skills/disciplined-delivery/assets"]
 
 [tool.coverage.report]
 fail_under = 85

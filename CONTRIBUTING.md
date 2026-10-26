@@ -19,19 +19,21 @@ These live in one place each; read them, don't expect this file to restate them:
 ## Before you open a PR
 
 1. **One branch = one focused change.** No bundling unrelated changes.
-2. **Green locally** (reproduce CI):
+2. **Green on a clean checkout of the commit** (reproduce CI; the working tree does not count):
    ```bash
-   pip install ruff pytest
-   ruff check . && pytest -q
-   python scripts/validate_manifests.py
+   pip install ruff pytest pytest-cov
+   scripts/ci_local.sh --merge-preview      # CI's checks in a temp checkout of HEAD merged with main
    python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
    ```
+   Quote the SHA it prints under "How was it tested?" in the PR.
 3. **Run `code-review-skill` over the diff** and resolve blocking/important findings.
 4. **Leave a task report** under [`docs/reports/`](docs/reports/) (from `_TEMPLATE.md`) for
    decision-shaped or M/L work: decisions, what changed, evidence, outstanding items. For an
    XS/S change, a well-filled PR description is the report.
 5. **Fill the PR template** honestly. Blank sections, placeholder text, bundled changes, or no
-   evidence of human review get the PR closed without review.
+   evidence of human review get the PR closed without review. CI checks the description
+   against the template (`.github/workflows/pr-template.yml`, using the checker the plugin
+   ships) when the PR is opened or its description edited.
 6. **CI must be green** on the branch — local-only green is not "done".
 
 ## Skills are code

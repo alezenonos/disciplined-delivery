@@ -1,0 +1,29 @@
+name: PR template
+
+# Every pull request description must follow .github/PULL_REQUEST_TEMPLATE.md. Runs when the
+# PR is opened, reopened or its description is edited, not on a push: a push cannot change
+# the body, and on the project this was first measured on those re-runs were 37% of the
+# check's runs. A result belongs to a commit, so after a push the PR's newest commit carries
+# no result from this check: before making it a required check (branch protection), add
+# `synchronize` back.
+#
+# Copy to .github/workflows/pr-template.yml and check_pr_template.py to .github/scripts/.
+# Pin the action to a SHA in your repository (Dependabot keeps the pin current).
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check-template:
+    # Dependabot writes its own PR bodies; the template is for people and agents.
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate the PR description against the template
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: python3 .github/scripts/check_pr_template.py --must-tick "Single focused change?"

@@ -7,6 +7,43 @@ All notable changes to this project are documented here. The format is based on
 ## [Unreleased]
 
 ### Added
+- `disciplined-delivery`: **shipped assets** under `skills/disciplined-delivery/assets/`, ready
+  to copy into a consuming repo: a lean `PULL_REQUEST_TEMPLATE.md` (problem, change, how
+  tested naming the commit, alternatives, known limits, single-change attestation, review
+  boxes for behaviour-shaping and shipped changes); `check_pr_template.py` + `pr-template.yml`,
+  a CI check that reads its rules from the template (sections present, prose filled, the
+  single-change box ticked; a `--must-tick` typo is a config error, not a silent no-op); and
+  `ci_local.sh`, which runs the repo's checks on a **temporary clean checkout of the commit**,
+  never the working tree, with `--merge-preview` testing the merge with the base and the tested
+  SHA printed for the PR body.
+- `disciplined-delivery`: `references/gates.md` (what each gate caught and what it costs) and
+  `references/evidence.md` (the measurement, evidence and recording norms), so `SKILL.md`
+  carries one line per rule and the reasoning lives beside it.
+- `disciplined-delivery`: loop gates for **mutation-checking a test that passes at once**
+  (and confirming a test still asserts before trusting a survived mutation), **verifying on a
+  clean checkout of the exact commit** and naming the SHA, **confirming the artifact under test
+  is the one you changed**, and **enumerating a guard's callers and exits** before claiming it
+  holds (defaults are paths; `async def` need not suspend; name a bound's zero point; bound the
+  final encoded artefact).
+- `disciplined-delivery`: **"Measurement & rules"** — measure before adding a rule or check
+  ("regression guard" when the count is zero); report, never exclude; state what would falsify
+  a measurement; a derived number carries its command; evidence artefacts are immutable.
+- `disciplined-delivery`: behaviour-shaping changes now require **two runs on the same
+  configuration or no claim**, a subset chosen by whether the change narrows or broadens, a
+  confounded baseline disclosed, a release that refuses an unmeasured prompt, and no
+  self-authored golden expectations.
+- `disciplined-delivery`: engineering standards for **diagnostics that degrade, never abort**,
+  **fail-closed privacy settings**, **checks that report PASS/FAIL/BLOCKED with a reason**,
+  **release and deploy as reviewed scripts in the repo** with every production change logged
+  with its rollback, **specs compared against a partner's source** by a check, and
+  **handoffs that need no command from the recipient**.
+- `disciplined-delivery`: decisions & docs — **rationale has one home and the code points at
+  it** (ADR / report / one-line comment; a decision index; a citation guard), corrections
+  marked `[corrected]` in place, the negative report written, a living "how we work" with the
+  cost of each gate, and tracker entries that stand on their own.
+- This repo dogfoods the assets: `.github/workflows/pr-template.yml` checks PR descriptions
+  with the shipped checker; `scripts/ci_local.sh` wraps the shipped runner with CI's commands;
+  the PR template gained a "How was it tested?" section; tests cover both assets.
 - `disciplined-delivery`: **"Review the whole surface"** — review the deployment paths a change
   ships through (container `COPY`, compose/orchestration env defaults, packaging manifest, CI),
   not just the diff's logic; read a third-party library's installed source when relying on its
@@ -26,6 +63,10 @@ All notable changes to this project are documented here. The format is based on
   **read-only vendor/partner-owned inputs**.
 
 ### Changed
+- `disciplined-delivery`: the **PR template is now enforced by a check**, not only required by
+  prose, and PR bodies must carry the known limits; a gate must render in an enforcing surface
+  (template checkbox worded for every case, CI check, or refusing script), kept in proportion
+  to what its CI minutes buy, and never a CI path filter.
 - `disciplined-delivery`: the **ask-before-writing gate now covers every outward-visible action**
   — posting to a tracker, commenting, messaging, deploying — not only git writes.
 - `disciplined-delivery`: **task reports are now scaled to the task.** Decision-shaped and M/L work

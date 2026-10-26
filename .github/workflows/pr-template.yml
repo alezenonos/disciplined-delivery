@@ -1,0 +1,27 @@
+name: PR template
+
+# Every pull request description must follow .github/PULL_REQUEST_TEMPLATE.md, checked by the
+# checker this plugin ships (skills/disciplined-delivery/assets/check_pr_template.py): the
+# repo dogfoods its own asset. Runs when the PR is opened, reopened or its description is
+# edited, not on a push: a push cannot change the body. Before making it a required check,
+# add `synchronize` back so the newest commit carries a result.
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check-template:
+    # Dependabot writes its own PR bodies; the template is for people and agents.
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Validate the PR description against the template
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: >-
+          python3 skills/disciplined-delivery/assets/check_pr_template.py
+          --must-tick "Existing PRs"

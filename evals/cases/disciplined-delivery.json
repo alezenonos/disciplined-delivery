@@ -6,30 +6,43 @@
     "Add input validation to this function",
     "Move this hardcoded timeout into a config file",
     "The checklist says this guard is missing — please build it",
-    "Our board says this is done but I am not sure — reconcile it with the docs"
+    "Our board says this is done but I am not sure — reconcile it with the docs",
+    "The new test passed on the first run, so we are good to commit, right?",
+    "CI is off this month; just run the tests here and tell me it is safe to merge",
+    "Add a prompt rule so the model stops doing X",
+    "Set up a PR template and local CI for this new repo"
   ],
   "negatives": [
     "What does this function return?",
     "Explain how this module works"
   ],
   "expectations": [
-    "Plans/brainstorms before coding for non-trivial work (via the superpowers plugin)",
-    "Checks the code before building something a doc or checklist claims is missing",
+    "Plans/brainstorms before coding for non-trivial work (via the superpowers plugin), answering from the codebase what the codebase can answer",
+    "Checks the code before building something a doc or checklist claims is missing, and checks the local convention before arguing with a gate",
     "Writes a failing test first, then the minimal code to green (TDD)",
-    "Keeps tests + linter + CI green before claiming done",
+    "Mutates the implementation when a test passes on its first run and confirms exactly that test fails; reverts by edit, not git checkout",
+    "Asserts on a test's own derivation (parsed, globbed or filtered subject) so a test that stops asserting fails",
+    "Keeps tests + linter + CI green before claiming done, run on a clean checkout of the exact commit (ci_local.sh, --merge-preview when the base moved), and names the SHA",
+    "Confirms the artifact under test is the one just changed before believing a result",
+    "Reports a check that could not run as BLOCKED with its reason, never as passed",
     "Reviews the deployment surface — container COPY, compose/orchestration env defaults, packaging manifest, CI — not just the diff's logic",
+    "Tests what ships the way its recipient gets it, and makes the software set itself up rather than telling the recipient to run a command",
     "Reads the installed source of a third-party library when relying on its default behaviour, and names what the test doubles cannot cover",
+    "Enumerates a guard's callers (including defaults) and exits, and what each caller does on cancellation, before claiming the guard holds",
     "Runs code-review-skill over the diff before opening a PR",
-    "Verifies each review finding against the code before implementing it, and records anything deferred",
+    "Verifies each review finding against the code before implementing it, verifies its own 'unplanned/unmeasured' claims by reading the doc or running the measurement, and records anything deferred",
     "Discloses in the PR when no independent review was possible instead of self-reviewing silently",
     "Refuses to add a config key, flag or option that nothing reads",
     "Pins the wiring rather than the value when moving a constant into config, and writes no constant-vs-literal tautology tests",
-    "Re-runs the behavioural eval and states the result when prompts, domain rules or model choice change",
+    "Re-runs the behavioural eval with at least two runs on the same configuration when prompts, domain rules, corpus or model choice change, states the result, and says when the baseline is confounded",
+    "Measures a failure mode before adding a rule or check for it, and labels a zero-count check 'regression guard'",
+    "Keeps a derived number next to the command that produced it, and never hides a failure category",
     "Stops and asks before any git write (branch/commit/push/PR) or other outward-visible action such as posting to a tracker",
-    "Fills the PR template; writes a docs/reports entry for decision-shaped or M/L work, not for one-line changes",
+    "Fills the PR template including known limits, ships the template + CI checker + ci_local.sh into a repo that lacks them, and writes a docs/reports entry for decision-shaped or M/L work, not for one-line changes",
+    "Puts rationale in one home (ADR, dated report, or a one-line comment pointing at the record) rather than paragraphs beside the code",
     "Treats vendor- or partner-owned contracts/specs as read-only, raising changes with the owner instead of editing locally",
     "Verifies a pinned external identifier (model slug, image tag, API version) is still live, and prefers an auto-resolving default",
     "States the nearest contradicting measurement when a number justifies a design choice",
-    "Reconciles tracker and docs in both directions, saying which way each item moved"
+    "Reconciles tracker and docs in both directions, saying which way each item moved, and writes tracker entries that stand on their own"
   ]
 }
