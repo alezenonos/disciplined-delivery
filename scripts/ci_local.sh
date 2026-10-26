@@ -4,13 +4,15 @@
 #
 #   scripts/ci_local.sh [--merge-preview]     # --merge-preview tests the commit merged with origin/main
 #
-# The coverage gate needs pytest-cov; `pip install ruff pytest pytest-cov` first.
+# The coverage gate needs pytest-cov; `pip install ruff pytest pytest-cov` first. pytest runs as
+# `python3 -m pytest` so the plugin and the interpreter cannot differ: on its first clean-checkout
+# run a bare `pytest` resolved to a standalone install without pytest-cov and failed (exit 4).
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 # shellcheck disable=SC2016  # single quotes on purpose: the script expands inside the clean checkout
 exec "$here/../skills/disciplined-delivery/assets/ci_local.sh" "$@" -- sh -c '
   ruff check . &&
-  COVERAGE_PROCESS_START="$PWD/pyproject.toml" pytest -q --cov --cov-report=term-missing &&
+  COVERAGE_PROCESS_START="$PWD/pyproject.toml" python3 -m pytest -q --cov --cov-report=term-missing &&
   python3 scripts/validate_manifests.py &&
   python3 scripts/check_evals.py &&
   python3 skills/scaffold-agentic-app/scaffold.py "$(mktemp -d)/app" >/dev/null

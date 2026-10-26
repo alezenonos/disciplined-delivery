@@ -124,6 +124,14 @@ written before the final commit exists, so it is not quoted here):
   working tree instead of the clean checkout failed exactly the two tests about the clean checkout
   and the merge preview; dropping the prose-section rule failed exactly the three tests about
   comment-only sections. Both reverted by edit.
+- **The clean-checkout gate caught something on its first run.** Every check above had passed on
+  the working tree. `scripts/ci_local.sh --merge-preview` on the first commit (`a8dc3d1`) failed
+  with `pytest: error: unrecognized arguments: --cov`: in the fresh checkout, bare `pytest`
+  resolved to a standalone tool install without `pytest-cov`, while the working-tree runs had used
+  `python3 -m pytest`. The harness was exercising a different interpreter from the one the checks
+  were written for (gates.md §7). The wrapper now runs `python3 -m pytest`, and the second run
+  passed on the fixed commit. Recorded because it is the rule justifying itself on the change
+  that introduces it.
 
 **Not verified:**
 
