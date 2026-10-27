@@ -11,9 +11,10 @@ All notable changes to this project are documented here. The format is based on
   **GitHub Copilot** (CLI, VS Code, cloud agent).
 - `scripts/validate_manifests.py`: the install-consistency check now fails when `install.sh` or
   `README.md` never adds the marketplace a dependency resolves from, the drift that left
-  0.2.2's docs pointing at the legacy `superpowers-marketplace` while CI stayed green. Only
-  Claude Code's own `marketplace add` commands count, so the README's Copilot steps can't
-  satisfy it.
+  0.2.2's docs pointing at the legacy `superpowers-marketplace` while CI stayed green. In the
+  README only the Claude Code steps count (between `<!-- install-check: claude-code -->`
+  markers), so its Copilot steps can't satisfy it; the marketplace must be added before the
+  plugin is installed.
 - `disciplined-delivery`: **shipped assets** under `skills/disciplined-delivery/assets/`, ready
   to copy into a consuming repo: a lean `PULL_REQUEST_TEMPLATE.md` (problem, change, how
   tested naming the commit, alternatives, known limits, single-change attestation, review

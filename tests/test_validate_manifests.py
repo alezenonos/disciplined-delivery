@@ -21,6 +21,14 @@ def _run(root: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _readme(claude_code_steps: str, outside: str = "") -> str:
+    """A README whose Claude Code install steps sit between the check's markers."""
+    return (
+        f"{outside}<!-- install-check: claude-code -->\n{claude_code_steps}"
+        "<!-- /install-check -->\n"
+    )
+
+
 def test_passes_on_this_repo() -> None:
     result = _run(REPO)
     assert result.returncode == 0, result.stdout + result.stderr
@@ -77,7 +85,7 @@ def test_flags_install_docs_not_adding_dependency_marketplace(tmp_path: Path) ->
         "claude plugin marketplace add obra/superpowers-marketplace\n"
     )
     (tmp_path / "README.md").write_text(
-        "/plugin marketplace add obra/superpowers-marketplace\n"
+        _readme("/plugin marketplace add obra/superpowers-marketplace\n")
     )
 
     result = _run(tmp_path)
@@ -102,7 +110,7 @@ def test_reports_only_the_install_doc_that_is_wrong(tmp_path: Path) -> None:
     (tmp_path / "install.sh").write_text(
         "claude plugin marketplace add anthropics/claude-plugins-official\n"
     )
-    (tmp_path / "README.md").write_text("no marketplace steps here\n")
+    (tmp_path / "README.md").write_text(_readme("no marketplace steps here\n"))
 
     result = _run(tmp_path)
     assert "README.md never adds marketplace 'claude-plugins-official'" in result.stdout
@@ -136,10 +144,54 @@ def test_copilot_marketplace_add_does_not_count_for_claude_code(tmp_path: Path) 
         "claude plugin marketplace add obra/superpowers-marketplace\n"
     )
     (tmp_path / "README.md").write_text(
-        "/plugin marketplace add anthropics/claude-plugins-official\n"
-        "copilot plugin marketplace add obra/superpowers-marketplace\n"
+        _readme(
+            "/plugin marketplace add anthropics/claude-plugins-official\n",
+            outside="copilot plugin marketplace add obra/superpowers-marketplace\n"
+            "/plugin marketplace add obra/superpowers-marketplace\n",  # Copilot's slash form
+        )
     )
 
     result = _run(tmp_path)
     assert "README.md never adds marketplace 'superpowers-marketplace'" in result.stdout
     assert "install.sh never adds" not in result.stdout
+
+
+def _with_skill(root: Path) -> None:
+    skill = root / "skills" / "ok" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text("---\nname: ok\ndescription: ok\n---\n")
+
+
+def test_readme_claude_code_section_with_slash_add_passes(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    _with_skill(tmp_path)
+    (tmp_path / "install.sh").write_text(
+        "claude plugin marketplace add anthropics/claude-plugins-official\n"
+    )
+    (tmp_path / "README.md").write_text(
+        _readme("/plugin marketplace add anthropics/claude-plugins-official\n")
+    )
+
+    result = _run(tmp_path)
+    assert result.returncode == 0, result.stdout
+
+
+def test_flags_readme_without_claude_code_section_markers(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    (tmp_path / "README.md").write_text(
+        "/plugin marketplace add anthropics/claude-plugins-official\n"
+    )
+
+    result = _run(tmp_path)
+    assert "README.md has no '<!-- install-check: claude-code -->'" in result.stdout
+
+
+def test_flags_plugin_installed_before_its_dependency_marketplace(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    (tmp_path / "install.sh").write_text(
+        "claude plugin install disciplined-delivery@alezenonos\n"
+        "claude plugin marketplace add anthropics/claude-plugins-official\n"
+    )
+
+    result = _run(tmp_path)
+    assert "install.sh installs the plugin before adding marketplace" in result.stdout

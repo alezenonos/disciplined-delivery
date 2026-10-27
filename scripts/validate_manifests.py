@@ -93,30 +93,52 @@ def validate_skills(root: Path, errors: list[str]) -> None:
                 errors.append(f"{skill}: frontmatter missing '{key.rstrip(':')}'")
 
 
+README_MARKERS = ("<!-- install-check: claude-code -->", "<!-- /install-check -->")
+
+
 def _check_install_docs_add(
     root: Path, dep_name: str | None, dep_market: str, errors: list[str]
 ) -> None:
-    """Require each install doc to run Claude Code's ``marketplace add <owner>/<dep_market>``.
+    """Require each install doc to add ``<owner>/<dep_market>`` before installing the plugin.
 
-    ``plugin.json`` dependencies are resolved by Claude Code, so only its own
-    commands count (``/plugin marketplace add``, ``claude plugin marketplace
-    add``), not another agent's such as ``copilot plugin marketplace add``.
-    A marketplace's name is matched against the repo name in the argument,
-    which holds for GitHub-hosted marketplaces such as
+    ``plugin.json`` dependencies are resolved by Claude Code, so only its
+    install steps count: all of ``install.sh``, and in ``README.md`` only the
+    section between ``README_MARKERS``, so another agent's steps (Copilot's)
+    can't satisfy it. A marketplace's name is matched against the repo name in
+    the argument, which holds for GitHub-hosted marketplaces such as
     ``anthropics/claude-plugins-official``. A line commented out before the
-    ``add`` doesn't count.
+    command doesn't count.
     """
+    command = r"^[^#\n]*(?:/plugin|\bclaude plugin) "
     adds = re.compile(
-        rf"^[^#\n]*(?:/plugin|\bclaude plugin) marketplace add\s+[\w.-]+/"
-        rf"{re.escape(dep_market)}(?![\w.-])",
-        re.MULTILINE,
+        rf"{command}marketplace add\s+[\w.-]+/{re.escape(dep_market)}(?![\w.-])", re.MULTILINE
     )
+    installs = re.compile(rf"{command}install\b", re.MULTILINE)
     for doc in ("install.sh", "README.md"):
         path = root / doc
-        if path.is_file() and not adds.search(path.read_text(encoding="utf-8")):
+        if not path.is_file():
+            continue
+        steps = path.read_text(encoding="utf-8")
+        if doc == "README.md":
+            start, end = README_MARKERS
+            if start not in steps or end not in steps:
+                errors.append(
+                    f"install: README.md has no '{start}' … '{end}' section around its "
+                    "Claude Code install steps"
+                )
+                continue
+            steps = steps.split(start, 1)[1].split(end, 1)[0]
+        add = adds.search(steps)
+        install = installs.search(steps)
+        if add is None:
             errors.append(
                 f"install: {doc} never adds marketplace '{dep_market}', which dependency "
                 f"'{dep_name}' resolves from — a fresh install would leave it unresolved"
+            )
+        elif install is not None and install.start() < add.start():
+            errors.append(
+                f"install: {doc} installs the plugin before adding marketplace "
+                f"'{dep_market}', so dependency '{dep_name}' would be left unresolved"
             )
 
 
