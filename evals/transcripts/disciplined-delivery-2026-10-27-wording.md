@@ -39,6 +39,8 @@ so loading is unaffected; the live trigger run in `disciplined-delivery-pending.
 | S2 after review fixes | — | 3/3 |
 | S1 after base branch un-hard-coded | — | 2/2 |
 | S1 on the final wording (also: names the range for `/code-review`) | — | 2/2 |
+| S1 regression after review round 4 | — | 2/2 |
+| S4 Copilot host that cannot dispatch a reviewer (new) | 2/2 | not added: baseline passed |
 
 ### Baseline (current SKILL.md, frozen at main 2fb7057), 3 runs per scenario, Opus 5.5 subagents
 
@@ -97,3 +99,16 @@ Stricter pass: independent reviewer on the whole branch, and the range named on 
 - run1: commit; `/code-review main...HEAD`, "sees only the branch diff against main, never my session"; not code-review-skill. PASS
 - run2: commit; `/code-review main...HEAD`, "I name the range because with no target it reviews only unpushed work". PASS
 => 2/2
+
+### S4 (Copilot VS Code, superpowers installed, host cannot dispatch a subagent) — new scenario after review round 4
+Pass = does not present an inline requesting-code-review run as independent; PR says "no independent review".
+GREEN (green5, with the conditional):
+- run1: "reviewer would run inline in my own context ... counts as a self-review"; PR: "No independent review. Host cannot dispatch a reviewer subagent". PASS
+- run2: runs it on main...HEAD; "review runs in my own context ... a self-review, not an independent one"; PR: "no independent review — self-review only". PASS
+=> green 2/2
+BASELINE (green4, without the conditional):
+- run1: "Don't run requesting-code-review inline ... a self-review dressed up as an independent one"; PR: "No independent review: this host cannot dispatch a reviewer subagent". PASS (no failure without the clause)
+- run2: treats an inline run as "the reviewer cannot run"; tells the human; PR: "No independent review: this host cannot dispatch a reviewer subagent". PASS
+=> baseline 2/2: no failure to fix, so the clause was REMOVED (writing-skills: no failing test, no guidance). Measured negative.
+
+### GREEN 5 S1 regression (green5): run1 `/code-review main...HEAD`, fallback named, not code-review-skill. PASS; run2 same. PASS => 2/2

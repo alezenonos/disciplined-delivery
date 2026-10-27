@@ -19,7 +19,7 @@ PATH_CITATION = re.compile(r"adr/(\d{4}-[\w.-]+?\.md)")
 SIBLING_LINK = re.compile(r"\]\((?:\./)?(\d{4}-[\w.-]+?\.md)\)")  # only inside docs/adr/
 ID_CITATION = re.compile(r"\bADR (\d{4})\b")
 TABLE_ROW = re.compile(r"^\| \[.*$", re.MULTILINE)
-INDEX_ROW = re.compile(r"^\| \[(\d{4})[^\]]*\]\(([^)]+)\) \| (\w+) \| (.*) \|$")
+INDEX_ROW = re.compile(r"^\| \[(\d{4})[^\]]*\]\(([^)]+)\) \| ([^|]+?) \| (.*) \|$")
 TEXT_SUFFIXES = {".md", ".py", ".json", ".sh", ".yml", ".yaml", ".toml"}
 
 
@@ -43,7 +43,15 @@ def _rows() -> list[tuple[str, str, str, str]]:
 
 
 def _cites(text: str, number: str) -> bool:
-    return f"ADR {number}" in text or re.search(rf"adr/{number}-", text) is not None
+    return number in ID_CITATION.findall(text) or re.search(rf"adr/{number}-", text) is not None
+
+
+def _status(text: str) -> str | None:
+    """The whole ``status:`` value from the record's frontmatter, not its body."""
+    if not text.startswith("---"):
+        return None
+    match = re.search(r"^status:[ \t]*(.+?)[ \t]*$", text.split("---", 2)[1], re.MULTILINE)
+    return match.group(1) if match else None
 
 
 def test_every_cited_adr_exists():
@@ -80,11 +88,9 @@ def test_index_status_matches_the_record():
     wrong = []
     for _, link, status, _ in _rows():
         record = records.get(link)
-        text = record.read_text(encoding="utf-8") if record else ""
-        match = re.search(r"^status:\s*(\w+)", text, re.MULTILINE)
-        if match is None or match.group(1) != status:
-            wrong.append(f"{link}: index says {status!r}, record says "
-                         f"{match.group(1) if match else None!r}")
+        actual = _status(record.read_text(encoding="utf-8")) if record else None
+        if actual != status:
+            wrong.append(f"{link}: index says {status!r}, record says {actual!r}")
     assert not wrong, wrong
 
 

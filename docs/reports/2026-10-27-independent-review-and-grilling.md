@@ -85,6 +85,8 @@ All grilled with the human one question at a time (`grilling`), each with a reco
   inferred, not run.
 - **The scenario runs are self-reported plans**, not observed tool calls in a live session. A
   live S1 run (does the agent actually invoke `/code-review`?) would be stronger evidence.
+- **S4, a Copilot host that cannot dispatch a reviewer:** no wording added; the baseline already
+  passed 2/2 (it discloses "no independent review"). Revisit only if a live run fails.
 - **No fallback for a missing `superpowers` outside Claude Code**: every S3 run noted it, all
   handled it well. Revisit only if a run fails.
 - `superpowers:requesting-code-review` is the non-Claude default but **has not been measured** on
@@ -101,6 +103,10 @@ All grilled with the human one question at a time (`grilling`), each with a reco
 ## Change log
 
 - 2026-10-27: created.
+- 2026-10-27: fourth review round: `/code-review` falls back to `requesting-code-review`; the
+  no-target wording corrected; the gates diagram reordered (commit → independent review → PR);
+  ADR guard reads status from frontmatter only. A proposed "host cannot dispatch a reviewer"
+  clause was tested red-first (S4) and dropped: the baseline already passed 2/2.
 - 2026-10-27: third review round: `/code-review` takes no requirements and, with no target,
   reviews only unpushed commits, so the skill names the range and drops the requirements claim
   for it; stronger ADR guard; Copilot cloud-agent companions.

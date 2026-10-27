@@ -16,9 +16,9 @@
           │ no                                            │
           │     ┌───────────────────────────────────────◀─┘
           ▼     ▼
-        slice ──▶ TDD (red first) ──▶ review gate ──▶ commit ──▶ PR ──▶ review round ──▶ merge
-          ▲                                                                  │
-          └──────────────────────── findings ──────────────────────────────◀─┘
+        slice ──▶ TDD (red first) ──▶ review gate ──▶ commit ──▶ independent review ──▶ PR ──▶ review round ──▶ merge
+          ▲                                                               │                          │
+          └───── findings ────────────────────────────────────────────────┴──────────────────────────┘
 ```
 
 One slice = one reviewable change. The review round is not a formality: in a sample of six
