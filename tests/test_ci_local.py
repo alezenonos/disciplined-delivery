@@ -108,6 +108,28 @@ def test_merge_preview_fails_on_a_conflict_and_runs_nothing(repo: Path, tmp_path
     assert not marker.exists(), "nothing runs on a tree that does not merge"
 
 
+def test_merge_preview_with_an_unknown_base_fails_with_a_summary(repo: Path) -> None:
+    out = run(repo, "--merge-preview", "--base", "no/such-ref", "--", "true")
+    assert out.returncode == 2
+    assert f"local CI for {head(repo)}: FAIL" in out.stdout
+    assert "no/such-ref" in out.stdout
+
+
+def test_merge_preview_fetches_the_base_first(repo: Path, tmp_path: Path) -> None:
+    # A real remote that moved after our last fetch: the preview must see its new commit.
+    upstream = tmp_path / "upstream.git"
+    git(repo, "clone", "-q", "--bare", str(repo), str(upstream))
+    git(repo, "remote", "add", "origin", str(upstream))
+    git(repo, "fetch", "-q", "origin")
+    pusher = tmp_path / "pusher"
+    git(tmp_path, "clone", "-q", "-b", "main", str(upstream), str(pusher))
+    commit_file(pusher, "late.txt")
+    git(pusher, "push", "-q", "origin", "main")
+
+    out = run(repo, "--merge-preview", "--", "test", "-e", "late.txt")
+    assert out.returncode == 0, out.stdout + out.stderr
+
+
 def test_leaves_no_worktree_behind(repo: Path) -> None:
     run(repo, "--", "true")
     listing = subprocess.run(["git", "worktree", "list"], cwd=repo, check=True,
@@ -126,5 +148,8 @@ def test_this_repo_wraps_the_asset_with_its_own_checks() -> None:
     assert os.access(WRAPPER, os.X_OK)
     text = WRAPPER.read_text(encoding="utf-8")
     assert "assets/ci_local.sh" in text
-    for check in ("ruff check", "pytest", "validate_manifests.py", "check_evals.py"):
+    # Every step of .github/workflows/ci.yml, so a PASS here means what CI's PASS means.
+    for check in ("ruff check", "pytest", "examples/roman-numerals", "--cov-fail-under=100",
+                  "validate_manifests.py", "check_evals.py", "shellcheck", "compileall",
+                  "created: 0 file(s)"):
         assert check in text, check

@@ -25,8 +25,14 @@ Usage::
 
     check_pr_template.py [--template PATH] [--must-tick SECTION]... [--body-file PATH]
 
+HTML comments are removed before anything is read, and a ``## `` line inside a
+fenced code block (a pasted transcript or log) is content, not a header.
+
 Kept deliberately simple and reviewable: it checks that the sections are there
-and filled, not that what they say is true.
+and filled, not that what they say is true. A section whose template holds a
+skeleton (a table, a bullet list, a ``<details>`` block) is required to be
+present but its content is not checked, because an honestly unticked list looks
+the same as an untouched one.
 """
 from __future__ import annotations
 
@@ -38,7 +44,8 @@ from pathlib import Path
 
 _COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 _HEADER_RE = re.compile(r"^\s*##\s+(.*?)\s*$")
-_TICKED_RE = re.compile(r"-\s*\[[xX]\]")
+_FENCE_RE = re.compile(r"^\s*(```|~~~)")
+_TICKED_RE = re.compile(r"^\s*[-*+]\s+\[[xX]\]", re.MULTILINE)
 
 
 def strip_comments(text: str) -> str:
@@ -49,22 +56,32 @@ def strip_comments(text: str) -> str:
 def parse_sections(text: str) -> dict[str, str]:
     """Split a markdown body into ``{header_title: content}`` on ``## `` headers.
 
-    Text before the first header (a template's preamble) is dropped.
+    HTML comments are removed first, and lines inside fenced code blocks are never
+    headers. Text before the first header (a template's preamble) is dropped; a
+    title that repeats has its contents joined, so neither copy can hide the other.
     """
     sections: dict[str, str] = {}
     current: str | None = None
     buf: list[str] = []
-    for line in text.splitlines():
-        match = _HEADER_RE.match(line)
+    in_fence = False
+
+    def flush() -> None:
+        if current is not None:
+            prior = sections.get(current)
+            joined = "\n".join(buf)
+            sections[current] = joined if prior is None else f"{prior}\n{joined}"
+
+    for line in strip_comments(text).splitlines():
+        if _FENCE_RE.match(line):
+            in_fence = not in_fence
+        match = None if in_fence else _HEADER_RE.match(line)
         if match:
-            if current is not None:
-                sections[current] = "\n".join(buf)
+            flush()
             current = match.group(1).strip()
             buf = []
         else:
             buf.append(line)
-    if current is not None:
-        sections[current] = "\n".join(buf)
+    flush()
     return sections
 
 
@@ -76,7 +93,7 @@ def template_rules(template_text: str) -> tuple[list[str], list[str]]:
     """
     sections = parse_sections(template_text)
     required = list(sections)
-    prose = [title for title, body in sections.items() if not strip_comments(body).strip()]
+    prose = [title for title, body in sections.items() if not body.strip()]
     return required, prose
 
 
@@ -105,7 +122,7 @@ def validate(body: str | None, template_text: str, must_tick: list[str]) -> list
 
     for title in prose:
         content = by_title.get(title.lower())
-        if content is not None and not strip_comments(content).strip():
+        if content is not None and not content.strip():
             problems.append(
                 f"Section '## {title}' is empty: replace the guidance comment with real content."
             )

@@ -18,8 +18,9 @@ permissions:
 
 jobs:
   check-template:
-    # Dependabot writes its own PR bodies; the template is for people and agents.
-    if: github.actor != 'dependabot[bot]'
+    # Dependabot writes its own PR bodies; the template is for people and agents. Keyed on the
+    # PR's author, not github.actor: on an `edited` event the actor is whoever edited it.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

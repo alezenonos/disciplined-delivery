@@ -111,6 +111,31 @@ def test_unticked_must_tick_checkbox_fails() -> None:
     assert "'## Single focused change?' must have its checkbox ticked" in result.stdout
 
 
+def test_a_tick_inside_a_comment_does_not_count() -> None:
+    body = COMPLIANT_BODY.replace(
+        "- [x] This PR is one self-contained change",
+        "<!-- - [x] --> - [ ] This PR is one self-contained change",
+    )
+    result = _run(body, "--must-tick", "Single focused change?")
+    assert result.returncode == 1
+    assert "must have its checkbox ticked" in result.stdout
+
+
+def test_a_header_inside_a_code_fence_is_not_a_section() -> None:
+    # A pasted transcript holding "## Known limits" must not replace the real section.
+    body = COMPLIANT_BODY.replace(
+        "## Known limits\n",
+        "```\n## Known limits\n```\n\n## Known limits\n",
+    ).replace("## Alternatives considered\n", "## Alternatives considered\n```\n## Review\n```\n")
+    result = _run(body, "--must-tick", "Single focused change?")
+    assert result.returncode == 0, result.stdout
+    # The only "## Known limits" sits inside a fence: the section is missing, not present.
+    fenced_only = COMPLIANT_BODY.replace("## Known limits\n", "```\n## Known limits\n```\n")
+    result = _run(fenced_only)
+    assert result.returncode == 1
+    assert "Missing required section: '## Known limits'" in result.stdout
+
+
 def test_checkbox_sections_are_not_required_to_be_ticked_unless_named() -> None:
     # "Review" is ticked by the human during review, not when the PR is opened.
     result = _run(COMPLIANT_BODY)

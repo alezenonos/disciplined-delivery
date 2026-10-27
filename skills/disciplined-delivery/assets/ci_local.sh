@@ -54,7 +54,17 @@ git -C "$top" worktree add -q --detach "$clean" "$head_sha"
 tested="a clean checkout of $short"
 
 if [ "$merge_preview" = 1 ]; then
-  base_sha=$(git -C "$top" rev-parse "$base")
+  # Fetch the base first: merging a stale origin/main previews a merge the host will not do.
+  # A failed fetch (offline) degrades to the local ref, and says so.
+  remote=${base%%/*}
+  if [ "$remote" != "$base" ] && git -C "$top" remote | grep -qx "$remote"; then
+    git -C "$top" fetch -q "$remote" "${base#*/}" 2>/dev/null ||
+      echo "note: could not fetch $base; previewing the merge with the local ref" >&2
+  fi
+  if ! base_sha=$(git -C "$top" rev-parse -q --verify "$base^{commit}"); then
+    echo "local CI for $short: FAIL, base $base is not a commit here; nothing was run"
+    exit 2
+  fi
   if git -C "$clean" -c user.name=ci-local -c user.email=ci-local@localhost \
        merge -q --no-ff --no-edit "$base_sha" >/dev/null 2>&1; then
     tested="$tested merged with $base ${base_sha:0:7}"
