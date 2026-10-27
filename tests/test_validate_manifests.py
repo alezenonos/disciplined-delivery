@@ -183,6 +183,7 @@ def test_flags_readme_without_claude_code_section_markers(tmp_path: Path) -> Non
     )
 
     result = _run(tmp_path)
+    assert result.returncode == 1
     assert "README.md has no '<!-- install-check: claude-code -->'" in result.stdout
 
 
@@ -194,4 +195,31 @@ def test_flags_plugin_installed_before_its_dependency_marketplace(tmp_path: Path
     )
 
     result = _run(tmp_path)
+    assert result.returncode == 1
     assert "install.sh installs the plugin before adding marketplace" in result.stdout
+
+
+def test_a_line_that_only_mentions_the_command_does_not_count(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    (tmp_path / "install.sh").write_text(
+        'echo "Run: claude plugin marketplace add anthropics/claude-plugins-official"\n'
+    )
+
+    result = _run(tmp_path)
+    assert result.returncode == 1
+    assert "install.sh never adds marketplace 'claude-plugins-official'" in result.stdout
+
+
+def test_flags_readme_markers_out_of_order_or_repeated(tmp_path: Path) -> None:
+    # A quoted or misplaced marker must not silently widen the checked section.
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    for readme in (
+        "<!-- /install-check -->\n<!-- install-check: claude-code -->\n"
+        "/plugin marketplace add anthropics/claude-plugins-official\n",
+        "`<!-- install-check: claude-code -->` explained here\n"
+        + _readme("/plugin marketplace add anthropics/claude-plugins-official\n"),
+    ):
+        (tmp_path / "README.md").write_text(readme)
+        result = _run(tmp_path)
+        assert result.returncode == 1
+        assert "README.md has no '<!-- install-check: claude-code -->'" in result.stdout

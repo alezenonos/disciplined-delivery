@@ -106,10 +106,10 @@ def _check_install_docs_add(
     section between ``README_MARKERS``, so another agent's steps (Copilot's)
     can't satisfy it. A marketplace's name is matched against the repo name in
     the argument, which holds for GitHub-hosted marketplaces such as
-    ``anthropics/claude-plugins-official``. A line commented out before the
-    command doesn't count.
+    ``anthropics/claude-plugins-official``. Only a line that starts with the
+    command counts, so a comment, an ``echo`` or prose that mentions it doesn't.
     """
-    command = r"^[^#\n]*(?:/plugin|\bclaude plugin) "
+    command = r"^[ \t]*(?:/plugin|claude plugin) "
     adds = re.compile(
         rf"{command}marketplace add\s+[\w.-]+/{re.escape(dep_market)}(?![\w.-])", re.MULTILINE
     )
@@ -121,7 +121,9 @@ def _check_install_docs_add(
         steps = path.read_text(encoding="utf-8")
         if doc == "README.md":
             start, end = README_MARKERS
-            if start not in steps or end not in steps:
+            # Exactly one of each, in order: a quoted or stray marker must not widen the section.
+            one_each = steps.count(start) == 1 and steps.count(end) == 1
+            if not one_each or steps.find(end) < steps.find(start):
                 errors.append(
                     f"install: README.md has no '{start}' … '{end}' section around its "
                     "Claude Code install steps"
@@ -150,9 +152,11 @@ def validate_install_consistency(root: Path, errors: list[str]) -> None:
 
     1. a cross-marketplace dependency that isn't allow-listed,
     2. a self-hosting marketplace that doesn't actually offer this plugin, and
-    3. install instructions (``install.sh``, ``README.md``) that never add the
-       marketplace a dependency resolves from, so a fresh install leaves it
-       unresolved. Skipped for a file that doesn't exist.
+    3. install instructions that never add the marketplace a dependency
+       resolves from, or add it only after installing the plugin, so a fresh
+       install leaves it unresolved. Checked in ``install.sh`` and in
+       ``README.md``'s Claude Code steps, which must sit between exactly one
+       pair of ``README_MARKERS``; a file that doesn't exist is skipped.
     """
     plugin = _load_json(root / ".claude-plugin" / "plugin.json", [])
     market = _load_json(root / ".claude-plugin" / "marketplace.json", [])
