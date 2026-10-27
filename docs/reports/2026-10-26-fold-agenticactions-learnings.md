@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Date created | 2026-10-26 |
-| Last edited | 2026-10-26 |
+| Last edited | 2026-10-27 |
 | Author | Claude (Claude Code, cloud session) |
 | Human partner | AZ |
 | Status | Complete on the authoring side; blocked on the live eval session before merge (see Outstanding) |
@@ -112,7 +112,7 @@ commit through `scripts/ci_local.sh --merge-preview` (the SHA is in the PR body;
 written before the final commit exists, so it is not quoted here):
 
 - `ruff check .` — clean.
-- `pytest -q --cov` with the coverage gate — 33 passed; coverage above the 85% gate, with the
+- `pytest -q --cov` with the coverage gate — 37 passed; coverage above the 85% gate, with the
   new checker measured (see the PR body for the exact figure).
 - `python scripts/validate_manifests.py`, `python scripts/check_evals.py` — valid.
 - `claude plugin validate .` — passed with the CLI's standing warnings.
@@ -132,6 +132,27 @@ written before the final commit exists, so it is not quoted here):
   were written for (gates.md §7). The wrapper now runs `python3 -m pytest`, and the second run
   passed on the fixed commit. Recorded because it is the rule justifying itself on the change
   that introduces it.
+
+**Pre-PR review (2026-10-27).** `code-review-skill` is not installed in the authoring container,
+so the built-in `code-review` skill reviewed the diff instead; the PR says so. It made ten
+findings. Each was checked against the code before acting:
+
+| Finding | Verdict | Action |
+|---|---|---|
+| A `- [x]` inside an HTML comment counted as a tick | real | comments stripped before parsing; ticks must start a list item |
+| A `## ` line inside a code fence was read as a header and could replace a real section | real | fenced lines are never headers; a repeated title joins its contents |
+| Local CI claimed to mirror `ci.yml` but left out five steps | real | the wrapper now runs every step, the scaffolded app's tests in a throwaway venv |
+| `--merge-preview` merged a possibly stale `origin/main` | real | fetches the base first; offline degrades to the local ref with a note |
+| The wrapper depended on the caller's working directory | real | it changes to the repo root first |
+| An unknown base exited 128 with no summary line | real | FAIL summary and exit 2 |
+| The Dependabot skip keyed on `github.actor`, the editor on an `edited` event | real | keyed on the PR's author, in both workflows |
+| The scaffold temp directory was never removed | real | removed by the command's own trap |
+| Sections holding a table or list skeleton are never checked for content | real, declined | an honestly unticked list looks the same as an untouched one; documented in the checker and in the PR's limits |
+| The test fixture repeats the checker's comment regex | declined | reusing the checker's function would make the fixture agree with the checker by construction |
+
+Every fix was written test-first (five new tests, red before the fix). The fence handling and the
+comment stripping were each mutated out, and each mutation failed the tests named for it. The
+full local CI passed on a clean checkout of `04303fd` merged with `origin/main` `2bef290`.
 
 **Not verified:**
 
@@ -177,3 +198,4 @@ written before the final commit exists, so it is not quoted here):
 ## Change log
 
 - 2026-10-26: created.
+- 2026-10-27: pre-PR review findings and their resolution added.
