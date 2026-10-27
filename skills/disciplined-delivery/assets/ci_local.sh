@@ -44,7 +44,7 @@ if [ -n "$(git -C "$top" status --porcelain)" ]; then
 fi
 
 clean=$(mktemp -d)
-# shellcheck disable=SC2329  # invoked by the trap below
+# shellcheck disable=SC2317,SC2329  # invoked by the trap below (SC2317 before 0.11, SC2329 after)
 cleanup() {
   git -C "$top" worktree remove --force "$clean" >/dev/null 2>&1 || rm -rf "$clean"
   git -C "$top" worktree prune >/dev/null 2>&1 || true

@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format is based on
 ## [Unreleased]
 
 ### Added
+- `README.md`: a copy-paste prompt for having an agent install the plugin, and install steps for
+  **GitHub Copilot** (CLI, VS Code, cloud agent).
 - `disciplined-delivery`: **shipped assets** under `skills/disciplined-delivery/assets/`, ready
   to copy into a consuming repo: a lean `PULL_REQUEST_TEMPLATE.md` (problem, change, how
   tested naming the commit, alternatives, known limits, single-change attestation, review
@@ -83,13 +85,12 @@ All notable changes to this project are documented here. The format is based on
   copy once installed elsewhere.
 
 ### Fixed
+- `assets/ci_local.sh`: the trap-only `cleanup()` now silences both **SC2317** (shellcheck before
+  0.11, as on CI's Ubuntu runners) and **SC2329** (0.11+); silencing only SC2329 failed
+  shellcheck in CI and in any consuming repo on an older shellcheck.
 - `README.md` and `install.sh` add the **official marketplace** (`anthropics/claude-plugins-official`)
   for the `superpowers` dependency; they still pointed at the legacy `superpowers-marketplace`
   after 0.2.2 moved the dependency, leaving `superpowers` unresolved on a fresh install.
-
-### Documentation
-- `README.md`: a copy-paste prompt for having an agent install the plugin, and install steps for
-  **GitHub Copilot** (CLI, VS Code, cloud agent).
 
 ## [0.2.2] - 2026-07-18
 
