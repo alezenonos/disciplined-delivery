@@ -83,6 +83,7 @@ the remaining companion-skill steps.
 
 Run inside Claude Code (slash commands) **or** in a terminal (prefix each with `claude `):
 
+<!-- install-check: claude-code -->
 ```bash
 # 1. Make sure the official marketplace is added FIRST — `superpowers` resolves from it, and a
 #    dependency from a marketplace you have not added is left unresolved. Harmless if present.
@@ -101,6 +102,7 @@ npx skills@latest add mattpocock/skills   # then select grill-with-docs
 # 4. Install the code-review-skill companion (a bare skill, installed by git clone):
 git clone https://github.com/awesome-skills/code-review-skill.git ~/.claude/skills/code-review-skill
 ```
+<!-- /install-check -->
 
 Terminal equivalents: `claude plugin marketplace add …` and `claude plugin install …`.
 
@@ -127,8 +129,12 @@ npx skills@latest list                   # lists grill-with-docs
 ```
 
 In a Claude Code session, `/disciplined-delivery:disciplined-delivery` and
-`/disciplined-delivery:scaffold-agentic-app` should both autocomplete. If `superpowers` shows
-as unresolved, the official marketplace was not added first (see step 1).
+`/disciplined-delivery:scaffold-agentic-app` should both autocomplete. If the plugin fails to
+load with `Dependency "superpowers@claude-plugins-official" is not installed`, your `superpowers`
+came from another marketplace (or the official one was not added first). Fix it by removing
+the other copy (e.g. `claude plugin uninstall superpowers@superpowers-marketplace`), then
+`claude plugin marketplace add anthropics/claude-plugins-official` and
+`claude plugin install superpowers@claude-plugins-official`.
 
 **GitHub Copilot:** `copilot plugin list` shows `disciplined-delivery` and `superpowers` (CLI); in
 VS Code chat, typing `/` lists `disciplined-delivery` and `scaffold-agentic-app`; the companion
@@ -137,8 +143,9 @@ checks are the same as above, with `~/.copilot/skills/` if you cloned there.
 Developing from a checkout, `claude plugin validate .` is the authoritative manifest check. CI
 additionally runs a hermetic **install-consistency** check (`scripts/validate_manifests.py`):
 it confirms cross-marketplace dependencies are allow-listed, that the marketplace actually
-offers this plugin, and that `install.sh` and this README add the marketplace each dependency
-resolves from — the misconfigurations that would otherwise only surface at install time.
+offers this plugin, and that `install.sh` and this README's Claude Code steps (between the
+`install-check` markers) add the marketplace each dependency resolves from, before installing
+the plugin — the misconfigurations that would otherwise only surface at install time.
 
 ### GitHub Copilot
 
