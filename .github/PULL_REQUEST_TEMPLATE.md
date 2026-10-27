@@ -33,6 +33,12 @@ Adapted from obra/superpowers' PULL_REQUEST_TEMPLATE.md.
 ## What does this PR change?
 <!-- 1-3 sentences. What, not why — the "why" belongs above. -->
 
+## How was it tested?
+<!-- Which tests were added (written red-first) and what each would catch; the pass
+     count, ruff, coverage. Name the commit the checks ran on: `scripts/ci_local.sh
+     --merge-preview` runs CI's checks on a clean checkout and prints the SHA. Say what
+     was NOT run. "Not checked" is never "passed". -->
+
 ## Is this change appropriate for this plugin?
 <!-- This plugin ships the `disciplined-delivery` and `scaffold-agentic-app`
      skills and their packaging. Ask yourself:

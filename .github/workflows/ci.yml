@@ -47,8 +47,8 @@ jobs:
         run: python scripts/validate_manifests.py
       - name: Validate skill eval cases
         run: python scripts/check_evals.py
-      - name: Shellcheck install.sh
-        run: shellcheck install.sh
+      - name: Shellcheck the shell scripts
+        run: shellcheck install.sh scripts/ci_local.sh skills/disciplined-delivery/assets/ci_local.sh
 
   scaffold:
     name: Scaffold generator self-test (py${{ matrix.python-version }})
