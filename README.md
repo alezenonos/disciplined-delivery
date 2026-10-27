@@ -119,7 +119,9 @@ Terminal equivalents: `claude plugin marketplace add …` and `claude plugin ins
 Confirm it actually works after installing. **Claude Code:**
 
 ```bash
-claude plugin list                       # disciplined-delivery@alezenonos + superpowers, both enabled
+claude plugin list                       # disciplined-delivery@alezenonos + superpowers@claude-plugins-official, both enabled
+                                         # a superpowers@superpowers-marketplace left from before 0.2.2 is a stale
+                                         # duplicate: claude plugin uninstall superpowers@superpowers-marketplace
 ls ~/.claude/skills/code-review-skill    # code-review-skill cloned
 npx skills@latest list                   # lists grill-with-docs
 ```

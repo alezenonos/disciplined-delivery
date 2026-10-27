@@ -95,3 +95,25 @@ def test_skips_install_docs_check_when_files_absent(tmp_path: Path) -> None:
 
     result = _run(tmp_path)
     assert result.returncode == 0, result.stdout
+
+
+def test_reports_only_the_install_doc_that_is_wrong(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    (tmp_path / "install.sh").write_text(
+        "claude plugin marketplace add anthropics/claude-plugins-official\n"
+    )
+    (tmp_path / "README.md").write_text("no marketplace steps here\n")
+
+    result = _run(tmp_path)
+    assert "README.md never adds marketplace 'claude-plugins-official'" in result.stdout
+    assert "install.sh never adds" not in result.stdout
+
+
+def test_commented_out_marketplace_add_does_not_count(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    (tmp_path / "install.sh").write_text(
+        "# claude plugin marketplace add anthropics/claude-plugins-official\n"
+    )
+
+    result = _run(tmp_path)
+    assert "install.sh never adds marketplace 'claude-plugins-official'" in result.stdout

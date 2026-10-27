@@ -100,9 +100,12 @@ def _check_install_docs_add(
 
     A marketplace's name is matched against the repo name in the ``add``
     argument, which holds for GitHub-hosted marketplaces such as
-    ``anthropics/claude-plugins-official``.
+    ``anthropics/claude-plugins-official``. A line commented out before the
+    ``add`` doesn't count.
     """
-    adds = re.compile(rf"marketplace add\s+[\w.-]+/{re.escape(dep_market)}(?![\w.-])")
+    adds = re.compile(
+        rf"^[^#\n]*marketplace add\s+[\w.-]+/{re.escape(dep_market)}(?![\w.-])", re.MULTILINE
+    )
     for doc in ("install.sh", "README.md"):
         path = root / doc
         if path.is_file() and not adds.search(path.read_text(encoding="utf-8")):
