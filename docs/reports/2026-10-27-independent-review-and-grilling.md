@@ -6,7 +6,7 @@
 | Last edited | 2026-10-27 |
 | Author | Claude Opus 5.5 (Claude Code 2.1.311) |
 | Human partner | alezenonos |
-| Status | Complete (pending review) |
+| Status | In progress |
 | Related | branch `feat/independent-review-and-grilling`; [ADR 0001](../adr/0001-independent-review-and-agent-runnable-grilling.md); transcript `evals/transcripts/disciplined-delivery-2026-10-27-wording.md`; prior PRs #29, #30, #32 |
 
 ## Task
@@ -46,9 +46,10 @@ All grilled with the human one question at a time (`grilling`), each with a reco
 
 - `skills/disciplined-delivery/SKILL.md`: Requires (independent reviewer; `grilling` +
   `domain-modeling`; `requesting-code-review` listed under superpowers), loop step 1, loop step 6,
-  Decisions & docs. 6 lines changed; `description` untouched.
+  Decisions & docs; step 6 now says commit, then review `main...HEAD` with the requirements.
+  `description` untouched.
 - `docs/adr/0001-…`: the decision record (the repo's first ADR; `docs/adr/` added to the layout in
-  README and CLAUDE.md).
+  README and CLAUDE.md), the index `docs/adr/README.md`, and `tests/test_adr_index.py`.
 - README (how-it-works prose, diagram, agent prompt, Claude Code install steps inside the
   `install-check` markers, components table, verify steps, Copilot companions), `install.sh`,
   `CLAUDE.md`, `CONTRIBUTING.md`, the eval case expectation and the pending transcript template.
@@ -62,6 +63,15 @@ All grilled with the human one question at a time (`grilling`), each with a reco
   check **3/3 → 2/2**. Baseline S1 runs said outright that they would not use an independent
   reviewer "because the skill doesn't call for them"; one green run volunteered that
   `code-review-skill` "would run inside my own session".
+- **Independent review of the branch** (`/code-review`, medium) found 8. Fixed: the review must
+  cover `main...HEAD` after committing (requesting-code-review diffs commits, so an uncommitted
+  change went unreviewed); the requirements are passed in; Copilot names the skill bare; the
+  `domain-modeling` wording (it writes ADRs only for hard-to-reverse decisions); an ADR index and
+  guard test (`tests/test_adr_index.py`, each test mutation-checked); this report's status.
+  Refuted: "/code-review may run in the author's context" — it ran forked here and, on #29,
+  re-raised a claim already refuted in the author's session. Covered: Copilot without
+  superpowers falls to the existing "no independent review" disclosure (2/2 S3 runs did).
+  GREEN re-run on the revised wording: S1 3/3 (stricter pass), S2 3/3.
 - Local CI, independent review and CI results: see the PR (named SHA).
 
 ## Outstanding / next steps

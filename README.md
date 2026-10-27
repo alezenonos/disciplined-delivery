@@ -180,8 +180,8 @@ both repos into a skills directory VS Code reads: `~/.copilot/skills/` for every
 skills** (from `obra/superpowers`, `skills/`) into the target repo's `.github/skills/`.
 
 **Companions:** `npx skills@latest add mattpocock/skills` (select `grilling` and
-`domain-modeling`) works for Copilot too. The pre-PR review uses
-`superpowers:requesting-code-review` there, since Claude Code's `/code-review` isn't available.
+`domain-modeling`) works for Copilot too. The pre-PR review uses superpowers'
+`requesting-code-review` there, since Claude Code's `/code-review` isn't available.
 
 > Copilot support follows GitHub's and VS Code's documented plugin and skill formats. It is not
 > yet covered by this repo's CI.
@@ -226,7 +226,7 @@ pyproject.toml        # ruff + pytest config
   dependabot.yml      # keeps the pinned actions current
   PULL_REQUEST_TEMPLATE.md
 docs/
-  adr/                # architecture decision records (decisions and why)
+  adr/                # architecture decision records + index (README.md), guarded by tests
   reports/            # one task report per change (_TEMPLATE.md + dated reports)
 evals/
   cases/              # per-skill eval cases (triggers / negatives / expectations)

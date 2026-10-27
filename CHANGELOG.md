@@ -18,6 +18,8 @@ All notable changes to this project are documented here. The format is based on
   before, 3/3 after. Companion install is now one `npx skills` step.
 
 ### Added
+- `docs/adr/`: the first decision record, an index of records and the code that carries them, and
+  `tests/test_adr_index.py`, which fails on a citation of a missing ADR or an unindexed one.
 - `README.md`: a copy-paste prompt for having an agent install the plugin, and install steps for
   **GitHub Copilot** (CLI, VS Code, cloud agent).
 - `scripts/validate_manifests.py`: the install-consistency check now fails when `install.sh` or
