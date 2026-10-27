@@ -97,3 +97,5 @@ All grilled with the human one question at a time (`grilling`), each with a reco
 ## Change log
 
 - 2026-10-27: created.
+- 2026-10-27: first review round's fixes recorded under Verification; second round's fixes
+  (transcript de-duplicated, base branch not hard-coded in the skill, stronger ADR guard).

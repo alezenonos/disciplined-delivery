@@ -27,7 +27,8 @@ These live in one place each; read them, don't expect this file to restate them:
    ```
    Quote the SHA it prints under "How was it tested?" in the PR.
 3. **Get an independent review** of the whole branch, `main...HEAD` (`/code-review` in Claude Code;
-   `superpowers:requesting-code-review` elsewhere) and resolve blocking/important findings.
+   `superpowers:requesting-code-review` elsewhere) and resolve blocking/important findings
+   ([ADR 0001](docs/adr/0001-independent-review-and-agent-runnable-grilling.md)).
 4. **Leave a task report** under [`docs/reports/`](docs/reports/) (from `_TEMPLATE.md`) for
    decision-shaped or M/L work: decisions, what changed, evidence, outstanding items. For an
    XS/S change, a well-filled PR description is the report.
