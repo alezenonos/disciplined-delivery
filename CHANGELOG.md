@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Changed
+- The `superpowers` dependency resolves from **obra's marketplace** (`superpowers-marketplace`)
+  again, reversing 0.2.2. That marketplace is maintained again and follows obra's repository, while
+  the official marketplace pins a reviewed commit and lags behind: on 27 Oct 2026 obra's served
+  7.0.1 (released 21 Oct) and the official one 7.0.0. A plugin whose dependency names one
+  marketplace fails to load when superpowers comes from the other ("Dependency
+  superpowers@claude-plugins-official is not installed"), so the dependency follows the source
+  the install instructions already name: `install.sh` and the README add obra's marketplace first.
+
 ### Added
 - `README.md`: a copy-paste prompt for having an agent install the plugin, and install steps for
   **GitHub Copilot** (CLI, VS Code, cloud agent).
