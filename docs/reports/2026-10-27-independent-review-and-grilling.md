@@ -46,7 +46,8 @@ All grilled with the human one question at a time (`grilling`), each with a reco
 
 - `skills/disciplined-delivery/SKILL.md`: Requires (independent reviewer; `grilling` +
   `domain-modeling`; `requesting-code-review` listed under superpowers), loop step 1, loop step 6,
-  Decisions & docs; step 6 now says commit, then review `main...HEAD` with the requirements.
+  Decisions & docs; step 6 now says commit, then run `/code-review <default-branch>...HEAD` (or
+  `requesting-code-review` with the merge base and the requirements).
   `description` untouched.
 - `docs/adr/0001-…`: the decision record (the repo's first ADR; `docs/adr/` added to the layout in
   README and CLAUDE.md), the index `docs/adr/README.md`, and `tests/test_adr_index.py`.
@@ -65,13 +66,16 @@ All grilled with the human one question at a time (`grilling`), each with a reco
   `code-review-skill` "would run inside my own session".
 - **Independent review of the branch** (`/code-review`, medium) found 8. Fixed: the review must
   cover `main...HEAD` after committing (requesting-code-review diffs commits, so an uncommitted
-  change went unreviewed); the requirements are passed in; Copilot names the skill bare; the
+  change went unreviewed); the requirements are passed in [corrected in round 3: only to
+  `requesting-code-review`; `/code-review` takes none]; Copilot names the skill bare; the
   `domain-modeling` wording (it writes ADRs only for hard-to-reverse decisions); an ADR index and
   guard test (`tests/test_adr_index.py`, each test mutation-checked); this report's status.
   Refuted: "/code-review may run in the author's context" — it ran forked here and, on #29,
   re-raised a claim already refuted in the author's session. Covered: Copilot without
   superpowers falls to the existing "no independent review" disclosure (2/2 S3 runs did).
   GREEN re-run on the revised wording: S1 3/3 (stricter pass), S2 3/3.
+- **Rounds 2 and 3** (8 and 10 findings): fixes listed in the change log below and the PR. S1 on
+  the final wording (`/code-review <default-branch>...HEAD`): 2/2.
 - Local CI, independent review and CI results: see the PR (named SHA).
 
 ## Outstanding / next steps
@@ -97,5 +101,8 @@ All grilled with the human one question at a time (`grilling`), each with a reco
 ## Change log
 
 - 2026-10-27: created.
+- 2026-10-27: third review round: `/code-review` takes no requirements and, with no target,
+  reviews only unpushed commits, so the skill names the range and drops the requirements claim
+  for it; stronger ADR guard; Copilot cloud-agent companions.
 - 2026-10-27: first review round's fixes recorded under Verification; second round's fixes
   (transcript de-duplicated, base branch not hard-coded in the skill, stronger ADR guard).

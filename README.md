@@ -177,7 +177,8 @@ both repos into a skills directory VS Code reads: `~/.copilot/skills/` for every
 
 **Copilot cloud agent:** it only sees skills committed to the repository, so copy
 `skills/disciplined-delivery/` (and `scaffold-agentic-app/` if wanted) **and the `superpowers`
-skills** (from `obra/superpowers`, `skills/`) into the target repo's `.github/skills/`.
+skills** (from `obra/superpowers`, `skills/`) and the `grilling` and `domain-modeling` skills
+(from `mattpocock/skills`) into the target repo's `.github/skills/`.
 
 **Companions:** `npx skills@latest add mattpocock/skills` (select `grilling` and
 `domain-modeling`) works for Copilot too. The pre-PR review uses superpowers'

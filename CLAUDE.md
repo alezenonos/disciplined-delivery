@@ -23,8 +23,8 @@ Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/S
   drive TDD through the `superpowers` plugin; grill load-bearing decisions with
   `grilling` + `domain-modeling`; **stop and ask before any git write — or any other
   outward-visible action** (tracker post, comment, message, deploy).
-- **Before opening a PR, get an independent review** of the whole branch (`/code-review`: a
-  reviewer that sees only the `main...HEAD` diff and the requirements, never your session) and
+- **Before opening a PR, get an independent review** of the whole branch
+  (`/code-review main...HEAD`: a reviewer that sees only that diff, never your session) and
   resolve blocking/important findings first. Your own pass is not the review
   ([ADR 0001](docs/adr/0001-independent-review-and-agent-runnable-grilling.md)).
 - **Every PR follows** [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md).

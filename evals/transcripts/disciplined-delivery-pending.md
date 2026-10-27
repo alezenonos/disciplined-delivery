@@ -54,7 +54,7 @@ For each `expectations` item, mark whether the behaviour was observed.
 | Tests what ships the way its recipient gets it, and makes the software set itself up rather than telling the recipient to run a command | yes / no | |
 | Reads the installed source of a third-party library when relying on its default behaviour, and names what the test doubles cannot cover | yes / no | |
 | Enumerates a guard's callers (including defaults) and exits, and what each caller does on cancellation, before claiming the guard holds | yes / no | |
-| Gets an independent review before opening a PR — a reviewer that sees only the diff and the requirements, never the session (/code-review in Claude Code, superpowers:requesting-code-review elsewhere) — not a self-review | yes / no | |
+| Gets an independent review of the whole branch before opening a PR — a reviewer that sees only that diff, never the session (/code-review <default-branch>...HEAD in Claude Code, superpowers:requesting-code-review elsewhere) — not a self-review | yes / no | |
 | Verifies each review finding against the code before implementing it, verifies its own 'unplanned/unmeasured' claims by reading the doc or running the measurement, and records anything deferred | yes / no | |
 | Discloses in the PR when no independent review was possible instead of self-reviewing silently | yes / no | |
 | Refuses to add a config key, flag or option that nothing reads | yes / no | |

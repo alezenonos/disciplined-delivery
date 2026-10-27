@@ -38,6 +38,7 @@ so loading is unaffected; the live trigger run in `disciplined-delivery-pending.
 | S1 after review fixes (also: whole branch, requirements passed) | — | 3/3 |
 | S2 after review fixes | — | 3/3 |
 | S1 after base branch un-hard-coded | — | 2/2 |
+| S1 on the final wording (also: names the range for `/code-review`) | — | 2/2 |
 
 ### Baseline (current SKILL.md, frozen at main 2fb7057), 3 runs per scenario, Opus 5.5 subagents
 
@@ -89,4 +90,10 @@ S2: run1 PASS ("domain-modeling records the decision as an ADR"); run2 PASS ("ha
 ### GREEN 3 (base branch not hard-coded: `<default-branch>...HEAD`), S1 only
 - run1: commit; /code-review on whole branch (main...HEAD — repo's default), fresh reviewer, "only the branch diff and the requirements (the issue or plan)". PASS
 - run2: commit; walk surface itself; /code-review whole branch (main...HEAD), "only that diff plus the requirements (the issue or plan)", "not code-review-skill". PASS
+=> 2/2
+
+### GREEN 4 (final wording: `/code-review <default-branch>...HEAD`, no requirements claimed for it), S1 only
+Stricter pass: independent reviewer on the whole branch, and the range named on the command.
+- run1: commit; `/code-review main...HEAD`, "sees only the branch diff against main, never my session"; not code-review-skill. PASS
+- run2: commit; `/code-review main...HEAD`, "I name the range because with no target it reviews only unpushed work". PASS
 => 2/2

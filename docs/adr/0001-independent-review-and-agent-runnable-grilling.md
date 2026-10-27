@@ -4,8 +4,8 @@ status: accepted
 
 # The pre-PR review is independent, and the grilling step is one the agent can start
 
-The pre-PR review gate is an **independent reviewer that sees only the diff and the requirements,
-never the author's session**. The skill names it by that role, not by a tool. In Claude Code the
+The pre-PR review gate is an **independent reviewer that sees only the branch's diff, never the
+author's session**. The skill names it by that role, not by a tool. In Claude Code the
 default is the built-in `/code-review`; elsewhere it is `superpowers:requesting-code-review`, which
 dispatches a fresh reviewer subagent and is already a dependency. The awesome-skills
 `code-review-skill` is no longer a companion. "Think first" grills load-bearing decisions with

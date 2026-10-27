@@ -26,7 +26,7 @@ These live in one place each; read them, don't expect this file to restate them:
    python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
    ```
    Quote the SHA it prints under "How was it tested?" in the PR.
-3. **Get an independent review** of the whole branch, `main...HEAD` (`/code-review` in Claude Code;
+3. **Get an independent review** of the whole branch (`/code-review main...HEAD` in Claude Code;
    `superpowers:requesting-code-review` elsewhere) and resolve blocking/important findings
    ([ADR 0001](docs/adr/0001-independent-review-and-agent-runnable-grilling.md)).
 4. **Leave a task report** under [`docs/reports/`](docs/reports/) (from `_TEMPLATE.md`) for

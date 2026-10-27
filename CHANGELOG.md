@@ -8,8 +8,8 @@ All notable changes to this project are documented here. The format is based on
 
 ### Changed
 - `disciplined-delivery`: the pre-PR review is an **independent reviewer** that sees only the
-  diff and the requirements, never the author's session: `/code-review` in Claude Code,
-  `superpowers:requesting-code-review` elsewhere. The awesome-skills `code-review-skill` is no
+  branch's diff, never the author's session: `/code-review <default-branch>...HEAD` in Claude
+  Code, `superpowers:requesting-code-review` (given the requirements too) elsewhere. The awesome-skills `code-review-skill` is no
   longer a companion. In a scenario eval, 0/3 agents got an independent review under the old
   wording and 3/3 under the new ([ADR 0001](docs/adr/0001-independent-review-and-agent-runnable-grilling.md)).
 - `disciplined-delivery`: load-bearing decisions are grilled with **`grilling` + `domain-modeling`**,
