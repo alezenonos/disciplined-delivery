@@ -9,6 +9,10 @@ A Claude Code **plugin**, distributed via a self-hosted marketplace, shipping tw
 - **`disciplined-delivery`** — ship work as small, test-first, human-reviewed increments.
 - **`scaffold-agentic-app`** — scaffold a production RAG/agentic app skeleton.
 
+GitHub Copilot (CLI, VS Code) installs the same plugin from `.claude-plugin/`, so keep skills as
+plain `skills/<name>/SKILL.md` and don't rely on Claude-only manifest fields for anything
+Copilot users need (it ignores `dependencies`).
+
 Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/SKILL.md`,
 `scripts/`, `tests/`, `evals/` (skill eval cases), `docs/reports/` (reports for decision-shaped / M-L work),
 `.github/` (CI workflow + PR template).

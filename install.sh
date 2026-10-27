@@ -4,7 +4,7 @@
 #
 # Installs:
 #   - disciplined-delivery + scaffold-agentic-app skills (this plugin)
-#   - superpowers (auto-resolved dependency, from obra's marketplace)
+#   - superpowers (auto-resolved dependency, from the official marketplace)
 # Then prints the manual steps for the companion skills (grill-with-docs, code-review-skill).
 #
 # Usage: ./install.sh
@@ -16,10 +16,10 @@ if ! command -v claude >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "==> Adding obra's superpowers marketplace (dependency source)"
+echo "==> Adding the official marketplace (superpowers dependency source)"
 echo "    A dependency from a marketplace you have not added is left unresolved,"
 echo "    so this must come before installing the plugin."
-claude plugin marketplace add obra/superpowers-marketplace
+claude plugin marketplace add anthropics/claude-plugins-official
 
 echo "==> Adding this marketplace"
 claude plugin marketplace add alezenonos/disciplined-delivery

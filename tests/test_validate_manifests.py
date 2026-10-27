@@ -67,3 +67,53 @@ def test_flags_marketplace_not_offering_this_plugin(tmp_path: Path) -> None:
     result = _run(tmp_path)
     assert result.returncode == 1
     assert "could not be installed from its own marketplace" in result.stdout
+
+
+def test_flags_install_docs_not_adding_dependency_marketplace(tmp_path: Path) -> None:
+    # The 0.2.2 drift: plugin.json moved superpowers to claude-plugins-official, but
+    # install.sh and the README kept adding the legacy marketplace.
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    (tmp_path / "install.sh").write_text(
+        "claude plugin marketplace add obra/superpowers-marketplace\n"
+    )
+    (tmp_path / "README.md").write_text(
+        "/plugin marketplace add obra/superpowers-marketplace\n"
+    )
+
+    result = _run(tmp_path)
+    assert result.returncode == 1
+    assert "install.sh never adds marketplace 'claude-plugins-official'" in result.stdout
+    assert "README.md never adds marketplace 'claude-plugins-official'" in result.stdout
+
+
+def test_skips_install_docs_check_when_files_absent(tmp_path: Path) -> None:
+    # A consuming layout without install.sh/README is not an error for this check.
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    skill = tmp_path / "skills" / "ok" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text("---\nname: ok\ndescription: ok\n---\n")
+
+    result = _run(tmp_path)
+    assert result.returncode == 0, result.stdout
+
+
+def test_reports_only_the_install_doc_that_is_wrong(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    (tmp_path / "install.sh").write_text(
+        "claude plugin marketplace add anthropics/claude-plugins-official\n"
+    )
+    (tmp_path / "README.md").write_text("no marketplace steps here\n")
+
+    result = _run(tmp_path)
+    assert "README.md never adds marketplace 'claude-plugins-official'" in result.stdout
+    assert "install.sh never adds" not in result.stdout
+
+
+def test_commented_out_marketplace_add_does_not_count(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    (tmp_path / "install.sh").write_text(
+        "# claude plugin marketplace add anthropics/claude-plugins-official\n"
+    )
+
+    result = _run(tmp_path)
+    assert "install.sh never adds marketplace 'claude-plugins-official'" in result.stdout
