@@ -129,8 +129,12 @@ npx skills@latest list                   # lists grill-with-docs
 ```
 
 In a Claude Code session, `/disciplined-delivery:disciplined-delivery` and
-`/disciplined-delivery:scaffold-agentic-app` should both autocomplete. If `superpowers` shows
-as unresolved, the official marketplace was not added first (see step 1).
+`/disciplined-delivery:scaffold-agentic-app` should both autocomplete. If the plugin fails to
+load with `Dependency "superpowers@claude-plugins-official" is not installed`, your `superpowers`
+came from another marketplace (or the official one was not added first). Fix it with
+`claude plugin marketplace add anthropics/claude-plugins-official`, then
+`claude plugin install superpowers@claude-plugins-official`, then remove the other copy
+(e.g. `claude plugin uninstall superpowers@superpowers-marketplace`).
 
 **GitHub Copilot:** `copilot plugin list` shows `disciplined-delivery` and `superpowers` (CLI); in
 VS Code chat, typing `/` lists `disciplined-delivery` and `scaffold-agentic-app`; the companion
