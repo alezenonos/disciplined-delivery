@@ -117,3 +117,29 @@ def test_commented_out_marketplace_add_does_not_count(tmp_path: Path) -> None:
 
     result = _run(tmp_path)
     assert "install.sh never adds marketplace 'claude-plugins-official'" in result.stdout
+
+
+def test_copilot_marketplace_add_does_not_count_for_claude_code(tmp_path: Path) -> None:
+    # The README's Copilot section adds obra's marketplace with `copilot plugin ...`.
+    # That must not satisfy a Claude Code dependency on the same marketplace, or the
+    # README's Claude Code steps can drift unnoticed (as they did after #31).
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    plugin_json = tmp_path / ".claude-plugin" / "plugin.json"
+    plugin = json.loads(plugin_json.read_text())
+    plugin["dependencies"] = [{"name": "superpowers", "marketplace": "superpowers-marketplace"}]
+    plugin_json.write_text(json.dumps(plugin))
+    market_json = tmp_path / ".claude-plugin" / "marketplace.json"
+    market = json.loads(market_json.read_text())
+    market["allowCrossMarketplaceDependenciesOn"] = ["superpowers-marketplace"]
+    market_json.write_text(json.dumps(market))
+    (tmp_path / "install.sh").write_text(
+        "claude plugin marketplace add obra/superpowers-marketplace\n"
+    )
+    (tmp_path / "README.md").write_text(
+        "/plugin marketplace add anthropics/claude-plugins-official\n"
+        "copilot plugin marketplace add obra/superpowers-marketplace\n"
+    )
+
+    result = _run(tmp_path)
+    assert "README.md never adds marketplace 'superpowers-marketplace'" in result.stdout
+    assert "install.sh never adds" not in result.stdout

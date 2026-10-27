@@ -96,15 +96,20 @@ def validate_skills(root: Path, errors: list[str]) -> None:
 def _check_install_docs_add(
     root: Path, dep_name: str | None, dep_market: str, errors: list[str]
 ) -> None:
-    """Require each install doc to run ``marketplace add <owner>/<dep_market>``.
+    """Require each install doc to run Claude Code's ``marketplace add <owner>/<dep_market>``.
 
-    A marketplace's name is matched against the repo name in the ``add``
-    argument, which holds for GitHub-hosted marketplaces such as
+    ``plugin.json`` dependencies are resolved by Claude Code, so only its own
+    commands count (``/plugin marketplace add``, ``claude plugin marketplace
+    add``), not another agent's such as ``copilot plugin marketplace add``.
+    A marketplace's name is matched against the repo name in the argument,
+    which holds for GitHub-hosted marketplaces such as
     ``anthropics/claude-plugins-official``. A line commented out before the
     ``add`` doesn't count.
     """
     adds = re.compile(
-        rf"^[^#\n]*marketplace add\s+[\w.-]+/{re.escape(dep_market)}(?![\w.-])", re.MULTILINE
+        rf"^[^#\n]*(?:/plugin|\bclaude plugin) marketplace add\s+[\w.-]+/"
+        rf"{re.escape(dep_market)}(?![\w.-])",
+        re.MULTILINE,
     )
     for doc in ("install.sh", "README.md"):
         path = root / doc
