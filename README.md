@@ -60,11 +60,12 @@ Paste this into Claude Code or GitHub Copilot (agent mode / CLI), in any directo
 Install the disciplined-delivery plugin from https://github.com/alezenonos/disciplined-delivery.
 Read its README "Install" section and follow the steps for the agent you are (Claude Code or
 GitHub Copilot): the plugin, its superpowers dependency, and the grill-with-docs and
-code-review-skill companions. Run the "Verify your install" checks and report what passed.
+code-review-skill companions. Then run the verify checks for your agent and report what passed.
 ```
 
-The agent needs no checkout: every step below works from the GitHub repo name. It will ask
-before running the commands if your permission mode requires it.
+No checkout is needed: the manual and Copilot steps work from the GitHub repo name (only the
+one-shot `./install.sh` runs from a checkout). The agent will ask before running commands if
+your permission mode requires it.
 
 ### Claude Code — quick install (one shot)
 
@@ -179,12 +180,13 @@ Copilot too; clone `code-review-skill` into `~/.copilot/skills/code-review-skill
 
 ## Skills
 
-Once installed, the skills are namespaced by the plugin:
+Once installed in Claude Code, the skills are namespaced by the plugin:
 
 - `/disciplined-delivery:disciplined-delivery`
 - `/disciplined-delivery:scaffold-agentic-app`
 
-Claude also loads them automatically when a task matches their description.
+In Copilot they are `/disciplined-delivery` and `/scaffold-agentic-app`. Both agents also load
+them automatically when a task matches their description.
 
 ## Adopting it in your repo
 
