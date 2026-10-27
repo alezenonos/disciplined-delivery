@@ -14,6 +14,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -92,14 +93,36 @@ def validate_skills(root: Path, errors: list[str]) -> None:
                 errors.append(f"{skill}: frontmatter missing '{key.rstrip(':')}'")
 
 
+def _check_install_docs_add(
+    root: Path, dep_name: str | None, dep_market: str, errors: list[str]
+) -> None:
+    """Require each install doc to run ``marketplace add <owner>/<dep_market>``.
+
+    A marketplace's name is matched against the repo name in the ``add``
+    argument, which holds for GitHub-hosted marketplaces such as
+    ``anthropics/claude-plugins-official``.
+    """
+    adds = re.compile(rf"marketplace add\s+[\w.-]+/{re.escape(dep_market)}(?![\w.-])")
+    for doc in ("install.sh", "README.md"):
+        path = root / doc
+        if path.is_file() and not adds.search(path.read_text(encoding="utf-8")):
+            errors.append(
+                f"install: {doc} never adds marketplace '{dep_market}', which dependency "
+                f"'{dep_name}' resolves from — a fresh install would leave it unresolved"
+            )
+
+
 def validate_install_consistency(root: Path, errors: list[str]) -> None:
     """Cross-check the manifests so a fresh install actually resolves.
 
     A hermetic stand-in for a live install smoke test (which needs the Claude
-    Code CLI + network). Catches the two common install-breakers:
+    Code CLI + network). Catches the common install-breakers:
 
-    1. a cross-marketplace dependency that isn't allow-listed, and
-    2. a self-hosting marketplace that doesn't actually offer this plugin.
+    1. a cross-marketplace dependency that isn't allow-listed,
+    2. a self-hosting marketplace that doesn't actually offer this plugin, and
+    3. install instructions (``install.sh``, ``README.md``) that never add the
+       marketplace a dependency resolves from, so a fresh install leaves it
+       unresolved. Skipped for a file that doesn't exist.
     """
     plugin = _load_json(root / ".claude-plugin" / "plugin.json", [])
     market = _load_json(root / ".claude-plugin" / "marketplace.json", [])
@@ -118,6 +141,8 @@ def validate_install_consistency(root: Path, errors: list[str]) -> None:
                 f"'{dep_market}', not in allowCrossMarketplaceDependenciesOn "
                 f"{sorted(allowed)} — cross-marketplace install would be blocked"
             )
+        if dep_market and dep_market != market_name:
+            _check_install_docs_add(root, dep.get("name"), dep_market, errors)
 
     plugin_name = plugin.get("name")
     offered = {e.get("name") for e in market.get("plugins", []) if isinstance(e, dict)}
