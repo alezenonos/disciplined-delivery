@@ -2,7 +2,8 @@
 
 [![CI](https://github.com/alezenonos/disciplined-delivery/actions/workflows/ci.yml/badge.svg)](https://github.com/alezenonos/disciplined-delivery/actions/workflows/ci.yml)
 
-A Claude Code plugin with two skills:
+A Claude Code plugin with two skills. It also installs in **GitHub Copilot** (CLI and VS Code),
+which reads the same plugin format — see [GitHub Copilot](#github-copilot).
 
 - **`disciplined-delivery`** — ship work as small, test-first, individually reviewable
   increments, with the human as the gate that commits and merges.
@@ -22,7 +23,7 @@ and a clean-checkout local CI runner) ready to copy into any repo — see
 ```mermaid
 flowchart TD
     subgraph install["Install (once)"]
-      A1["Add marketplace: obra/superpowers-marketplace"] --> A2["Add marketplace: alezenonos/disciplined-delivery"]
+      A1["Add marketplace: anthropics/claude-plugins-official"] --> A2["Add marketplace: alezenonos/disciplined-delivery"]
       A2 --> A3["plugin install disciplined-delivery@alezenonos<br/>(auto-pulls superpowers)"]
       A3 --> A4["companions: grill-with-docs (skills.sh)<br/>+ code-review-skill (git clone)"]
     end
@@ -51,12 +52,21 @@ flowchart TD
 
 ## Install
 
-> **Pointing an AI agent (Claude Code) at this repo?** Tell it: *"Install the skills
-> from this repo following the README."* The commands below, run in order, install
-> everything: this plugin's two skills, the `superpowers` dependency, and the companion
-> skills (`grill-with-docs` and `code-review-skill`).
+### Let an agent install it
 
-### Quick install (one shot)
+Paste this into Claude Code or GitHub Copilot (agent mode / CLI), in any directory:
+
+```text
+Install the disciplined-delivery plugin from https://github.com/alezenonos/disciplined-delivery.
+Read its README "Install" section and follow the steps for the agent you are (Claude Code or
+GitHub Copilot): the plugin, its superpowers dependency, and the grill-with-docs and
+code-review-skill companions. Run the "Verify your install" checks and report what passed.
+```
+
+The agent needs no checkout: every step below works from the GitHub repo name. It will ask
+before running the commands if your permission mode requires it.
+
+### Claude Code — quick install (one shot)
 
 From a checkout of this repo:
 
@@ -67,14 +77,14 @@ From a checkout of this repo:
 It adds both marketplaces, installs the plugin (which auto-pulls `superpowers`), and prints
 the remaining companion-skill steps.
 
-### Manual install
+### Claude Code — manual install
 
 Run inside Claude Code (slash commands) **or** in a terminal (prefix each with `claude `):
 
 ```bash
-# 1. Add obra's marketplace FIRST — a dependency from a marketplace you have not
-#    added is left unresolved.
-/plugin marketplace add obra/superpowers-marketplace
+# 1. Make sure the official marketplace is added FIRST — `superpowers` resolves from it, and a
+#    dependency from a marketplace you have not added is left unresolved. Harmless if present.
+/plugin marketplace add anthropics/claude-plugins-official
 
 # 2. Add this marketplace and install the plugin. This auto-resolves and installs
 #    `superpowers` (cross-marketplace install is permitted by
@@ -98,7 +108,7 @@ Terminal equivalents: `claude plugin marketplace add …` and `claude plugin ins
 | --- | --- | --- |
 | `disciplined-delivery` skill | this repo | plugin install |
 | `scaffold-agentic-app` skill | this repo | plugin install |
-| `superpowers` (brainstorming, writing-plans, TDD, verification) | obra/superpowers-marketplace | auto-resolved dependency |
+| `superpowers` (brainstorming, writing-plans, TDD, verification) | anthropics/claude-plugins-official | auto-resolved dependency (Claude Code); separate install (Copilot) |
 | `grill-with-docs` | mattpocock/skills (`skills.sh`) | `npx skills@latest add` |
 | `code-review-skill` | awesome-skills (GitHub) | `git clone` into `~/.claude/skills/` |
 
@@ -120,11 +130,52 @@ claude plugin validate .                 # if developing from a checkout
 
 In a Claude Code session, `/disciplined-delivery:disciplined-delivery` and
 `/disciplined-delivery:scaffold-agentic-app` should both autocomplete. If `superpowers` shows
-as unresolved, you skipped adding obra's marketplace first (see step 1).
+as unresolved, the official marketplace was not added first (see step 1).
 
 CI additionally runs a hermetic **install-consistency** check (`scripts/validate_manifests.py`):
 it confirms cross-marketplace dependencies are allow-listed and that the marketplace actually
 offers this plugin — the misconfigurations that would otherwise only surface at install time.
+
+### GitHub Copilot
+
+The skills are plain [Agent Skills](https://code.visualstudio.com/docs/agent-customization/agent-skills)
+(`skills/<name>/SKILL.md`), and Copilot reads Claude Code's plugin layout (`.claude-plugin/`),
+so nothing needs converting. Two differences from Claude Code:
+
+- **`superpowers` is not auto-installed.** Copilot ignores the `dependencies` field in
+  `plugin.json`, so install it yourself (below).
+- **Invocation is by skill name** — `/disciplined-delivery`, `/scaffold-agentic-app` — not the
+  `plugin:skill` form Claude Code uses. Copilot also loads them automatically when a task matches.
+
+**Copilot CLI:**
+
+```bash
+copilot plugin marketplace add alezenonos/disciplined-delivery
+copilot plugin install disciplined-delivery@alezenonos
+# or, without the marketplace:  copilot plugin install alezenonos/disciplined-delivery
+
+copilot plugin marketplace add anthropics/claude-plugins-official
+copilot plugin install superpowers@claude-plugins-official
+
+copilot plugin list   # disciplined-delivery and superpowers listed
+```
+
+**VS Code (Copilot agent mode):** run **Chat: Install Plugin From Source** from the Command
+Palette with `https://github.com/alezenonos/disciplined-delivery` (agent plugins are in preview
+and may be turned off by your organisation via `chat.plugins.enabled`). Or skip the plugin and
+copy the skill folders into a skills directory VS Code reads — `~/.copilot/skills/` for every
+project, or `.github/skills/` inside one repo.
+
+**Copilot cloud agent:** it only sees skills committed to the repository, so copy
+`skills/disciplined-delivery/` (and `scaffold-agentic-app/` if wanted) into the target repo's
+`.github/skills/`.
+
+**Companions:** `npx skills@latest add mattpocock/skills` (select `grill-with-docs`) works for
+Copilot too; clone `code-review-skill` into `~/.copilot/skills/code-review-skill` (or
+`~/.claude/skills/`, which VS Code also reads).
+
+> Copilot support follows GitHub's and VS Code's documented plugin and skill formats. It is not
+> yet covered by this repo's CI.
 
 ## Skills
 

@@ -82,6 +82,15 @@ All notable changes to this project are documented here. The format is based on
   `.github/PULL_REQUEST_TEMPLATE.md` instead of a relative path that resolved to this plugin's own
   copy once installed elsewhere.
 
+### Fixed
+- `README.md` and `install.sh` add the **official marketplace** (`anthropics/claude-plugins-official`)
+  for the `superpowers` dependency; they still pointed at the legacy `superpowers-marketplace`
+  after 0.2.2 moved the dependency, leaving `superpowers` unresolved on a fresh install.
+
+### Documentation
+- `README.md`: a copy-paste prompt for having an agent install the plugin, and install steps for
+  **GitHub Copilot** (CLI, VS Code, cloud agent).
+
 ## [0.2.2] - 2026-07-18
 
 ### Changed

@@ -4,7 +4,10 @@ Project memory for Claude Code and other coding agents working in this repo.
 
 ## What this repo is
 
-A Claude Code **plugin**, distributed via a self-hosted marketplace, shipping two skills:
+A Claude Code **plugin**, distributed via a self-hosted marketplace, shipping two skills.
+GitHub Copilot (CLI, VS Code) installs the same plugin from `.claude-plugin/`, so keep skills as
+plain `skills/<name>/SKILL.md` and don't rely on Claude-only manifest fields for anything
+Copilot users need (it ignores `dependencies`):
 
 - **`disciplined-delivery`** — ship work as small, test-first, human-reviewed increments.
 - **`scaffold-agentic-app`** — scaffold a production RAG/agentic app skeleton.
