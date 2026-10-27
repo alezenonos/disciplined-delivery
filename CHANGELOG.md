@@ -82,6 +82,11 @@ All notable changes to this project are documented here. The format is based on
   `.github/PULL_REQUEST_TEMPLATE.md` instead of a relative path that resolved to this plugin's own
   copy once installed elsewhere.
 
+### Fixed
+- `assets/ci_local.sh`: the trap-only `cleanup()` now silences both **SC2317** (shellcheck before
+  0.11, as on CI's Ubuntu runners) and **SC2329** (0.11+); silencing only SC2329 failed
+  shellcheck in CI and in any consuming repo on an older shellcheck.
+
 ## [0.2.2] - 2026-07-18
 
 ### Changed
