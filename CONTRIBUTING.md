@@ -10,7 +10,7 @@ These live in one place each; read them, don't expect this file to restate them:
 
 - **The loop and review-gate discipline:** [`skills/disciplined-delivery/SKILL.md`](skills/disciplined-delivery/SKILL.md)
   — think first (plan/brainstorm via `superpowers`; grill load-bearing decisions with
-  `grill-with-docs`), establish ground truth in the code, TDD red-first, verify, review the
+  `grilling` + `domain-modeling`), establish ground truth in the code, TDD red-first, verify, review the
   whole surface (deployment paths, library defaults), then stop and ask before any git write or
   other outward-visible action.
 - **Project conventions + working principles:** [`CLAUDE.md`](CLAUDE.md).
@@ -26,7 +26,8 @@ These live in one place each; read them, don't expect this file to restate them:
    python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
    ```
    Quote the SHA it prints under "How was it tested?" in the PR.
-3. **Run `code-review-skill` over the diff** and resolve blocking/important findings.
+3. **Get an independent review** of the diff (`/code-review` in Claude Code;
+   `superpowers:requesting-code-review` elsewhere) and resolve blocking/important findings.
 4. **Leave a task report** under [`docs/reports/`](docs/reports/) (from `_TEMPLATE.md`) for
    decision-shaped or M/L work: decisions, what changed, evidence, outstanding items. For an
    XS/S change, a well-filled PR description is the report.

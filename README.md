@@ -15,7 +15,7 @@ which reads the same plugin format — see [GitHub Copilot](#github-copilot).
 Install once, then let the skills drive the workflow: scaffold a new agentic/RAG app if you
 need a starting structure, then ship every change through the disciplined-delivery loop —
 plan/test via `superpowers`, prove it green on a clean checkout of the exact commit, review
-the whole surface (not just the diff), run `code-review-skill` over it, and hand it to a human.
+the whole surface (not just the diff), get an independent review of it, and hand it to a human.
 The skill also ships the mechanisms that enforce its rules (a PR template with a CI checker,
 and a clean-checkout local CI runner) ready to copy into any repo — see
 [Adopting it in your repo](#adopting-it-in-your-repo).
@@ -25,7 +25,7 @@ flowchart TD
     subgraph install["Install (once)"]
       A1["Add marketplace: anthropics/claude-plugins-official"] --> A2["Add marketplace: alezenonos/disciplined-delivery"]
       A2 --> A3["plugin install disciplined-delivery@alezenonos<br/>(auto-pulls superpowers)"]
-      A3 --> A4["companions: grill-with-docs (skills.sh)<br/>+ code-review-skill (git clone)"]
+      A3 --> A4["companions: grilling + domain-modeling<br/>(skills.sh)"]
     end
 
     install --> B{"Starting a new<br/>agentic / RAG app?"}
@@ -35,14 +35,14 @@ flowchart TD
     B -- No --> D
 
     subgraph loop["disciplined-delivery loop - per change"]
-      D["1. Think first<br/>brainstorm + plan via superpowers<br/>grill-with-docs stress-tests decisions"] --> D2["2. Ground truth in code<br/>grep before trusting a doc"]
+      D["1. Think first<br/>brainstorm + plan via superpowers<br/>grilling + domain-modeling<br/>stress-test decisions"] --> D2["2. Ground truth in code<br/>grep before trusting a doc"]
       D2 --> E["3. TDD red-first<br/>via superpowers; mutation-check<br/>a test that passes at once"]
       E --> F["4. Verify<br/>tests + lint on a clean checkout<br/>of the commit; CI green"]
       F --> F2["5. Review the whole surface<br/>deployment paths, library defaults,<br/>every path a guard must reach"]
       F2 --> G["6. Stop & ask<br/>before any outward-visible action"]
     end
 
-    G --> R["Code review the diff<br/>(code-review-skill)"]
+    G --> R["Independent review of the diff<br/>(/code-review or<br/>superpowers:requesting-code-review)"]
     R --> H["Human reviews full diff<br/>PR follows PULL_REQUEST_TEMPLATE.md"]
     H --> I{"Approved?"}
     I -- "needs changes" --> D
@@ -60,7 +60,7 @@ Paste this into Claude Code or GitHub Copilot (agent mode / CLI), in any directo
 Install the disciplined-delivery plugin from https://github.com/alezenonos/disciplined-delivery.
 Read its README "Install" section and follow the steps for the agent you are: "Claude Code —
 manual install" or "GitHub Copilot". Install the plugin, its superpowers dependency, and the
-grill-with-docs and code-review-skill companions. Then run the "Verify your install" checks for
+grilling and domain-modeling companions. Then run the "Verify your install" checks for
 your agent and report what passed.
 ```
 
@@ -95,12 +95,9 @@ Run inside Claude Code (slash commands) **or** in a terminal (prefix each with `
 /plugin marketplace add alezenonos/disciplined-delivery
 /plugin install disciplined-delivery@alezenonos
 
-# 3. Install the grill-with-docs companion skill. It ships via skills.sh (not a Claude
-#    Code plugin), so it is a separate step:
-npx skills@latest add mattpocock/skills   # then select grill-with-docs
-
-# 4. Install the code-review-skill companion (a bare skill, installed by git clone):
-git clone https://github.com/awesome-skills/code-review-skill.git ~/.claude/skills/code-review-skill
+# 3. Install the grilling and domain-modeling companion skills. They ship via skills.sh
+#    (not a Claude Code plugin), so it is a separate step:
+npx skills@latest add mattpocock/skills   # then select grilling and domain-modeling
 ```
 <!-- /install-check -->
 
@@ -113,8 +110,7 @@ Terminal equivalents: `claude plugin marketplace add …` and `claude plugin ins
 | `disciplined-delivery` skill | this repo | plugin install |
 | `scaffold-agentic-app` skill | this repo | plugin install |
 | `superpowers` (brainstorming, writing-plans, TDD, verification) | anthropics/claude-plugins-official (Claude Code); obra/superpowers-marketplace (Copilot CLI) | auto-resolved dependency (Claude Code); separate install (Copilot) |
-| `grill-with-docs` | mattpocock/skills (`skills.sh`) | `npx skills@latest add` |
-| `code-review-skill` | awesome-skills (GitHub) | `git clone` into `~/.claude/skills/` |
+| `grilling`, `domain-modeling` | mattpocock/skills (`skills.sh`) | `npx skills@latest add` |
 
 ### Verify your install
 
@@ -124,8 +120,7 @@ Confirm it actually works after installing. **Claude Code:**
 claude plugin list                       # disciplined-delivery@alezenonos + superpowers@claude-plugins-official, both enabled
                                          # a superpowers@superpowers-marketplace left from before 0.2.2 is a stale
                                          # duplicate: claude plugin uninstall superpowers@superpowers-marketplace
-ls ~/.claude/skills/code-review-skill    # code-review-skill cloned
-npx skills@latest list                   # lists grill-with-docs
+npx skills@latest list                   # lists grilling and domain-modeling
 ```
 
 In a Claude Code session, `/disciplined-delivery:disciplined-delivery` and
@@ -138,7 +133,7 @@ the other copy (e.g. `claude plugin uninstall superpowers@superpowers-marketplac
 
 **GitHub Copilot:** `copilot plugin list` shows `disciplined-delivery` and `superpowers` (CLI); in
 VS Code chat, typing `/` lists `disciplined-delivery` and `scaffold-agentic-app`; the companion
-checks are the same as above, with `~/.copilot/skills/` if you cloned there.
+check (`npx skills@latest list`) is the same as above.
 
 Developing from a checkout, `claude plugin validate .` is the authoritative manifest check. CI
 additionally runs a hermetic **install-consistency** check (`scripts/validate_manifests.py`):
@@ -184,9 +179,9 @@ both repos into a skills directory VS Code reads: `~/.copilot/skills/` for every
 `skills/disciplined-delivery/` (and `scaffold-agentic-app/` if wanted) **and the `superpowers`
 skills** (from `obra/superpowers`, `skills/`) into the target repo's `.github/skills/`.
 
-**Companions:** `npx skills@latest add mattpocock/skills` (select `grill-with-docs`) works for
-Copilot too; clone `code-review-skill` into `~/.copilot/skills/code-review-skill` (or
-`~/.claude/skills/`, which VS Code also reads).
+**Companions:** `npx skills@latest add mattpocock/skills` (select `grilling` and
+`domain-modeling`) works for Copilot too. The pre-PR review uses
+`superpowers:requesting-code-review` there, since Claude Code's `/code-review` isn't available.
 
 > Copilot support follows GitHub's and VS Code's documented plugin and skill formats. It is not
 > yet covered by this repo's CI.
@@ -231,6 +226,7 @@ pyproject.toml        # ruff + pytest config
   dependabot.yml      # keeps the pinned actions current
   PULL_REQUEST_TEMPLATE.md
 docs/
+  adr/                # architecture decision records (decisions and why)
   reports/            # one task report per change (_TEMPLATE.md + dated reports)
 evals/
   cases/              # per-skill eval cases (triggers / negatives / expectations)

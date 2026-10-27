@@ -5,7 +5,7 @@
 # Installs:
 #   - disciplined-delivery + scaffold-agentic-app skills (this plugin)
 #   - superpowers (auto-resolved dependency, from the official marketplace)
-# Then prints the manual steps for the companion skills (grill-with-docs, code-review-skill).
+# Then prints the manual step for the companion skills (grilling, domain-modeling).
 #
 # Usage: ./install.sh
 set -euo pipefail
@@ -31,14 +31,12 @@ cat <<'EOF'
 
 ==> Done with the plugin install.
 
-Two companion skills install separately (neither is a Claude Code plugin):
+The companion skills install separately (they ship via skills.sh, not as a plugin):
 
-  - grill-with-docs (via skills.sh):
-      npx skills@latest add mattpocock/skills        # select grill-with-docs
+  - grilling + domain-modeling:
+      npx skills@latest add mattpocock/skills        # select grilling and domain-modeling
 
-  - code-review-skill (bare skill, via git clone):
-      git clone https://github.com/awesome-skills/code-review-skill.git \
-        ~/.claude/skills/code-review-skill
+The pre-PR review uses Claude Code's built-in /code-review; nothing to install.
 
 Installed skills (namespaced by the plugin):
     /disciplined-delivery:disciplined-delivery

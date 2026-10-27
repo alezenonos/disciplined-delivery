@@ -14,17 +14,19 @@ plain `skills/<name>/SKILL.md` and don't rely on Claude-only manifest fields for
 Copilot users need (it ignores `dependencies`).
 
 Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/SKILL.md`,
-`scripts/`, `tests/`, `evals/` (skill eval cases), `docs/reports/` (reports for decision-shaped / M-L work),
+`scripts/`, `tests/`, `evals/` (skill eval cases), `docs/adr/` (decision records), `docs/reports/` (reports for decision-shaped / M-L work),
 `.github/` (CI workflow + PR template).
 
 ## How to work here
 
 - **Follow the `disciplined-delivery` skill.** Small focused changes; plan/brainstorm and
   drive TDD through the `superpowers` plugin; grill load-bearing decisions with
-  `grill-with-docs`; **stop and ask before any git write — or any other
+  `grilling` + `domain-modeling`; **stop and ask before any git write — or any other
   outward-visible action** (tracker post, comment, message, deploy).
-- **Before opening a PR, run `code-review-skill` over the diff** and resolve blocking/important
-  findings first.
+- **Before opening a PR, get an independent review** of the diff (`/code-review`: a reviewer
+  that sees only the diff and the requirements, never your session) and resolve
+  blocking/important findings first. Your own pass is not the review
+  ([ADR 0001](docs/adr/0001-independent-review-and-agent-runnable-grilling.md)).
 - **Every PR follows** [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md).
   No bundled or unrelated changes in one PR.
 - **Decision-shaped and M/L tasks leave a report** under `docs/reports/` (from
