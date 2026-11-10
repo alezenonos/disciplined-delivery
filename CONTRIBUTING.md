@@ -50,7 +50,10 @@ The project follows [Semantic Versioning](https://semver.org/) and keeps a
 [`CHANGELOG.md`](CHANGELOG.md). To cut a release:
 
 1. Move the `Unreleased` entries under a new `## [x.y.z] - YYYY-MM-DD` heading.
-2. Bump `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) to match.
+2. Bump `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) to match
+   (`scripts/validate_manifests.py` fails if the version has no changelog heading). Installed
+   users are only offered an update when this version changes, so merged work reaches nobody
+   until a release is cut.
 3. Tag and push using the marketplace convention `<plugin>--v<version>`:
    ```bash
    claude plugin tag --push        # creates disciplined-delivery--v<version>

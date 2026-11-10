@@ -15,6 +15,9 @@ All notable changes to this project are documented here. The format is based on
   README only the Claude Code steps count (between `<!-- install-check: claude-code -->`
   markers), so its Copilot steps can't satisfy it; the marketplace must be added before the
   plugin is installed.
+- `scripts/validate_manifests.py`: fails when `plugin.json`'s `version` has **no heading in
+  `CHANGELOG.md`** (installed users are offered an update only when the version changes), and
+  when a skill's `name` is empty or **not its directory name**.
 - `disciplined-delivery`: **shipped assets** under `skills/disciplined-delivery/assets/`, ready
   to copy into a consuming repo: a lean `PULL_REQUEST_TEMPLATE.md` (problem, change, how
   tested naming the commit, alternatives, known limits, single-change attestation, review
@@ -97,6 +100,8 @@ All notable changes to this project are documented here. The format is based on
 - `README.md` and `install.sh` add the **official marketplace** (`anthropics/claude-plugins-official`)
   for the `superpowers` dependency; they still pointed at the legacy `superpowers-marketplace`
   after 0.2.2 moved the dependency, leaving `superpowers` unresolved on a fresh install.
+- `scripts/validate_manifests.py`: skill frontmatter is read as top-level `key: value` lines; a
+  `name:` that only appeared inside the description's text used to satisfy the check.
 
 ## [0.2.2] - 2026-07-18
 

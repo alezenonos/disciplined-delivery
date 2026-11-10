@@ -343,3 +343,32 @@ def test_flags_a_version_the_changelog_does_not_record(tmp_path: Path) -> None:
 
     (root / "CHANGELOG.md").write_text("## [Unreleased]\n\n## [9.9.9] - 2026-01-02\n")
     assert _run(root).returncode == 0
+
+
+def test_flags_an_empty_name(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    (root / "skills" / "ok" / "SKILL.md").write_text("---\nname:\ndescription: ok\n---\n")
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "frontmatter 'name' is empty" in result.stdout
+
+
+def test_a_quoted_name_or_a_trailing_comment_still_matches(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    for line in ('name: "ok"', "name: ok  # the skill", "name: 'ok' # the skill"):
+        (root / "skills" / "ok" / "SKILL.md").write_text(f"---\n{line}\ndescription: ok\n---\n")
+        result = _run(root)
+        assert result.returncode == 0, line + "\n" + result.stdout
+
+
+def test_flags_a_version_that_is_not_a_string(tmp_path: Path) -> None:
+    # Reported like every other failure, not a traceback.
+    root = _plugin_root(tmp_path)
+    _rewrite(root / ".claude-plugin" / "plugin.json", lambda d: d.update(version=3))
+    (root / "CHANGELOG.md").write_text("## [3]\n")
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "plugin.json: 'version' must be a string" in result.stdout
+    assert "Traceback" not in result.stderr

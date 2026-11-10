@@ -84,8 +84,11 @@ def validate_skills(root: Path, errors: list[str]) -> None:
     """Every ``skills/*/SKILL.md`` must declare 'name' and 'description'.
 
     Only a top-level ``key: value`` line counts, so ``name:`` inside another value's
-    text does not. ``name`` must equal the skill's directory: the directory is what
-    the skill is invoked by and what ``check_evals.py`` matches eval cases against.
+    text does not. ``name`` must be non-empty and equal the skill's directory: the
+    directory is what the skill is invoked by and what ``check_evals.py`` matches eval
+    cases against. Quotes and a trailing ``# comment`` are not part of the name. A
+    ``description`` is only required to be present, because YAML lets its text start on
+    the next line.
     """
     skills_dir = root / "skills"
     skill_files = sorted(skills_dir.glob("*/SKILL.md"))
@@ -100,8 +103,12 @@ def validate_skills(root: Path, errors: list[str]) -> None:
         for key in ("name", "description"):
             if key not in keys:
                 errors.append(f"{skill}: frontmatter missing '{key}'")
-        name = keys.get("name", "").strip("'\"")
-        if name and name != skill.parent.name:
+        if "name" not in keys:
+            continue
+        name = re.sub(r"(?:^|\s+)#.*$", "", keys["name"]).strip("'\"")
+        if not name:
+            errors.append(f"{skill}: frontmatter 'name' is empty")
+        elif name != skill.parent.name:
             errors.append(
                 f"{skill}: name '{name}' does not match its directory '{skill.parent.name}'"
             )
@@ -213,6 +220,9 @@ def validate_release(root: Path, errors: list[str]) -> None:
     if not isinstance(plugin, dict) or not plugin.get("version") or not changelog.is_file():
         return
     version = plugin["version"]
+    if not isinstance(version, str):
+        errors.append(f"plugin.json: 'version' must be a string, not {version!r}")
+        return
     heading = re.compile(rf"^## \[{re.escape(version)}\]", re.MULTILINE)
     if not heading.search(changelog.read_text(encoding="utf-8")):
         errors.append(
