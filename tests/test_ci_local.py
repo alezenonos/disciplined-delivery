@@ -7,6 +7,7 @@ commit merged with its base when asked.
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 from pathlib import Path
 
@@ -15,6 +16,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[1]
 ASSET = REPO / "skills" / "disciplined-delivery" / "assets" / "ci_local.sh"
 WRAPPER = REPO / "scripts" / "ci_local.sh"
+CHECKS = REPO / "scripts" / "checks.sh"
 
 GIT_ENV = {
     "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
@@ -145,11 +147,40 @@ def test_a_missing_command_is_a_usage_error(repo: Path) -> None:
 
 def test_this_repo_wraps_the_asset_with_its_own_checks() -> None:
     # Not run here: the wrapper runs this suite, which would run the wrapper. A smoke check.
-    assert os.access(WRAPPER, os.X_OK)
+    assert os.access(WRAPPER, os.X_OK) and os.access(CHECKS, os.X_OK)
     text = WRAPPER.read_text(encoding="utf-8")
     assert "assets/ci_local.sh" in text
-    # Every step of .github/workflows/ci.yml, so a PASS here means what CI's PASS means.
-    for check in ("ruff check", "pytest", "examples/roman-numerals", "--cov-fail-under=100",
-                  "validate_manifests.py", "check_evals.py", "shellcheck", "compileall",
-                  "created: 0 file(s)"):
-        assert check in text, check
+    assert "scripts/checks.sh" in text
+
+
+def _workflow_commands() -> list[str]:
+    """Every single-line ``run:`` command of the CI workflow."""
+    lines = (REPO / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8").splitlines()
+    assert not any(line.strip() in ("run: |", "run: >-", "run: >") for line in lines), (
+        "a multi-line run block hides commands from this test: call scripts/checks.sh instead"
+    )
+    return [line.split("run:", 1)[1].strip() for line in lines if line.strip().startswith("run:")]
+
+
+def test_ci_and_local_ci_run_the_same_checks() -> None:
+    # One list of checks (scripts/checks.sh), so a PASS locally means what CI's PASS means:
+    # the workflow may install tools, and otherwise only calls a group of that script.
+    commands = _workflow_commands()
+    assert len(commands) >= 5, "extraction looks broken"
+    installs = ("pip install -r requirements-dev.txt", "npm install -g ")
+    groups = set()
+    for command in commands:
+        if command.startswith(installs):
+            continue
+        assert command.startswith("scripts/checks.sh "), f"a check outside checks.sh: {command}"
+        groups.add(command.split()[1])
+    script = CHECKS.read_text(encoding="utf-8")
+    declared = re.search(r"^CHECK_GROUPS=\((.*)\)$", script, re.MULTILINE)
+    assert declared, "extraction looks broken"
+    assert groups == set(declared.group(1).split()), "CI must run every group local CI runs"
+
+
+def test_checks_script_rejects_an_unknown_group() -> None:
+    out = subprocess.run([str(CHECKS), "no-such-group"], capture_output=True, text=True)
+    assert out.returncode == 2
+    assert "unknown group: no-such-group" in out.stderr

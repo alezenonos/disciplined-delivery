@@ -21,9 +21,8 @@ These live in one place each; read them, don't expect this file to restate them:
 1. **One branch = one focused change.** No bundling unrelated changes.
 2. **Green on a clean checkout of the commit** (reproduce CI; the working tree does not count):
    ```bash
-   pip install ruff pytest pytest-cov
+   pip install -r requirements-dev.txt
    scripts/ci_local.sh --merge-preview      # CI's checks in a temp checkout of HEAD merged with main
-   python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
    ```
    Quote the SHA it prints under "How was it tested?" in the PR.
 3. **Run `code-review-skill` over the diff** and resolve blocking/important findings.
@@ -50,7 +49,10 @@ The project follows [Semantic Versioning](https://semver.org/) and keeps a
 [`CHANGELOG.md`](CHANGELOG.md). To cut a release:
 
 1. Move the `Unreleased` entries under a new `## [x.y.z] - YYYY-MM-DD` heading.
-2. Bump `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) to match.
+2. Bump `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) to match
+   (`scripts/validate_manifests.py` fails if the version has no changelog heading). Installed
+   users are only offered an update when this version changes, so merged work reaches nobody
+   until a release is cut.
 3. Tag and push using the marketplace convention `<plugin>--v<version>`:
    ```bash
    claude plugin tag --push        # creates disciplined-delivery--v<version>

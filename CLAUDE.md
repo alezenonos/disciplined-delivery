@@ -37,12 +37,14 @@ Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/S
   claim done, **on a clean checkout of the commit, never the working tree**, and name the SHA
   in the PR:
   ```bash
-  scripts/ci_local.sh --merge-preview         # ruff, pytest + coverage gate, manifests, evals,
-                                              # scaffold — in a temp checkout of HEAD merged with main
-  claude plugin validate .                     # authoritative manifest check
-  python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
-  ( cd /tmp/app && pip install -r requirements.txt && pytest -q )
+  pip install -r requirements-dev.txt         # the pinned tools the checks need
+  scripts/ci_local.sh --merge-preview         # every CI check (ruff, pytest + coverage gate,
+                                              # manifests, evals, shellcheck, claude plugin
+                                              # validate, scaffold) in a temp checkout of HEAD
+                                              # merged with main
   ```
+  The checks live in `scripts/checks.sh`, which CI's jobs call too: add or change a check
+  there, never in the workflow.
   The individual commands are in `README.md` § Development. The PR description is checked in
   CI against the template by the checker this plugin ships (`.github/workflows/pr-template.yml`).
 - **Docs stay in sync.** Public modules, classes, and functions carry docstrings; update the
