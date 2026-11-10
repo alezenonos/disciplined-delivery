@@ -50,15 +50,17 @@ The project follows [Semantic Versioning](https://semver.org/) and keeps a
 
 1. Move the `Unreleased` entries under a new `## [x.y.z] - YYYY-MM-DD` heading.
 2. Bump `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) to match.
-3. Check the Claude Code CLI pin in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
-   against `npm view @anthropic-ai/claude-code version` and bump it if it is behind
-   (Dependabot cannot see that pin).
-4. Tag and push using the marketplace convention `<plugin>--v<version>`:
+3. Tag and push using the marketplace convention `<plugin>--v<version>`:
    ```bash
    claude plugin tag --push        # creates disciplined-delivery--v<version>
    ```
    Consumers resolve versioned dependencies against these tags. Every user-facing change
    should add a `CHANGELOG.md` entry under `Unreleased` in the same PR.
+
+When cutting a release, also check the Claude Code CLI pin in
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) against
+`npm view @anthropic-ai/claude-code version` and bump it if it is behind: Dependabot cannot
+see a version in a workflow's `run:` line.
 
 ## License
 
