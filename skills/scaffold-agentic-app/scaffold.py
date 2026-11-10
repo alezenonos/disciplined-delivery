@@ -40,10 +40,13 @@ def _module(summary: str, body: str = "") -> str:
 # A trailing empty string for a ``.gitkeep`` keeps an otherwise-empty dir.
 # --------------------------------------------------------------------------- #
 
+# The README's first line; ``scaffold`` replaces it with the target directory's name.
+README_TITLE = "# production-ai-app\n"
+
 FILES: dict[str, str] = {
     # ---- top-level project files -------------------------------------------------
     "README.md": (
-        "# production-ai-app\n\n"
+        f"{README_TITLE}\n"
         "Production RAG-style LLM application with an agentic layer. Scaffolded by the\n"
         "`scaffold-agentic-app` skill. See `architecture.md` for the design and\n"
         "`deployment.md` to run it.\n\n"
@@ -61,7 +64,9 @@ FILES: dict[str, str] = {
         "- `app/agent` — orchestration, decomposition, adaptive routing, pluggable tools\n"
         "- `app/eval` — input / context / output guardrails\n"
         "- `app/tracing` — tracing, feedback capture, cost tracking\n"
-        "- `tests` — retrieval / cache / routing tests (CI-ready)\n\n"
+        "- `tests` — config / health tests that run, plus retrieval / cache / routing\n"
+        "  stubs to un-skip as you build\n\n"
+        "Checks (the ones CI runs): `ruff check . && pytest`.\n\n"
         "After scaffolding, make all further changes as small, test-first, reviewed\n"
         "increments (see the `disciplined-delivery` skill).\n"
     ),
@@ -70,11 +75,17 @@ FILES: dict[str, str] = {
         "APP_ENV=development\n"
         "LOG_LEVEL=info\n"
         "LLM_PROVIDER=anthropic\n"
-        "LLM_MODEL=claude-opus-4-8\n"
+        "# LLM_MODEL=   # optional override; the default lives in app/config.py only\n"
         "ANTHROPIC_API_KEY=\n"
         "# Vector store / search backends\n"
         "VECTOR_DB_URL=\n"
         "SEMANTIC_CACHE_URL=\n"
+    ),
+    ".dockerignore": (
+        "# Keep secrets and local state out of the build context: the Dockerfiles `COPY . .`.\n"
+        ".env\n.env.*\n!.env.example\n"
+        ".git/\n.venv/\nvenv/\n__pycache__/\n*.py[cod]\n"
+        ".pytest_cache/\n.mypy_cache/\n.ruff_cache/\n"
     ),
     ".gitignore": (
         "__pycache__/\n*.py[cod]\n.venv/\nvenv/\n.env\n.pytest_cache/\n"
@@ -87,18 +98,30 @@ FILES: dict[str, str] = {
         "pydantic>=2.6\n"
         "pydantic-settings>=2.2\n"
         "httpx>=0.27\n"
+        "# dev tools: the tests and the linter CI runs\n"
         "pytest>=8.0\n"
+        "ruff>=0.6\n"
     ),
     "pyproject.toml": (
         "[project]\n"
         'name = "production-ai-app"\n'
         'version = "0.1.0"\n'
         'description = "Production RAG-style LLM app with an agentic layer."\n'
-        'requires-python = ">=3.10"\n\n'
+        'requires-python = ">=3.11"\n\n'
         "[tool.pytest.ini_options]\n"
         'testpaths = ["tests"]\n\n'
         "[tool.ruff]\n"
-        "line-length = 100\n"
+        "line-length = 100\n\n"
+        "[tool.ruff.lint]\n"
+        "# The style standard, enforced by the linter in CI: PEP-8 (E/W), pyflakes (F),\n"
+        "# import order (I), naming (N), Google-style docstrings (D), modern idioms (UP),\n"
+        "# common bugs (B).\n"
+        'select = ["E", "W", "F", "I", "N", "D", "UP", "B"]\n\n'
+        "[tool.ruff.lint.pydocstyle]\n"
+        'convention = "google"\n\n'
+        "[tool.ruff.lint.per-file-ignores]\n"
+        "# Test names are the documentation; every other rule still applies to tests.\n"
+        '"tests/**" = ["D"]\n'
     ),
     "Dockerfile": (
         "FROM python:3.11-slim\n"
@@ -162,7 +185,7 @@ FILES: dict[str, str] = {
         "Response: `ChatResponse` — "
         "`{ \"answer\": str, \"sources\": list, \"trace_id\": str }`.\n\n"
         "## `GET /health`\n"
-        "Liveness probe. Returns `{ \"status\": \"ok\" }`.\n\n"
+        "Liveness probe. Returns `{ \"status\": \"ok\", \"env\": str }` (`env` is `APP_ENV`).\n\n"
         "TODO: document auth, rate limits, and error shapes.\n"
     ),
     "deployment.md": (
@@ -178,16 +201,32 @@ FILES: dict[str, str] = {
         "on:\n"
         "  push:\n"
         "  pull_request:\n"
+        "permissions:\n"
+        "  contents: read\n"
         "jobs:\n"
         "  test:\n"
         "    runs-on: ubuntu-latest\n"
         "    steps:\n"
-        "      - uses: actions/checkout@v4\n"
-        "      - uses: actions/setup-python@v5\n"
+        "      # Pinned to a commit; .github/dependabot.yml keeps the pins current.\n"
+        "      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1\n"
+        "      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0\n"
         '        with: { python-version: "3.11" }\n'
         "      - run: pip install -r requirements.txt\n"
-        "      - run: python -m compileall app\n"
+        "      - run: ruff check .\n"
+        "      - run: python -m compileall -q app\n"
         "      - run: pytest\n"
+    ),
+    ".github/dependabot.yml": (
+        "version: 2\n"
+        "updates:\n"
+        "  - package-ecosystem: github-actions\n"
+        '    directory: "/"\n'
+        "    schedule:\n"
+        "      interval: weekly\n"
+        "  - package-ecosystem: pip\n"
+        '    directory: "/"\n'
+        "    schedule:\n"
+        "      interval: weekly\n"
     ),
     # ---- app package -------------------------------------------------------------
     "app/__init__.py": PKG_INIT,
@@ -215,14 +254,25 @@ FILES: dict[str, str] = {
     "app/config.py": (
         '"""Application settings, loaded from the environment."""\n'
         "from __future__ import annotations\n\n"
+        "from pydantic import SecretStr\n"
         "from pydantic_settings import BaseSettings, SettingsConfigDict\n\n\n"
         "class Settings(BaseSettings):\n"
-        '    """Typed configuration. TODO: add backend URLs and feature flags."""\n\n'
-        "    model_config = SettingsConfigDict(env_file=\".env\", extra=\"ignore\")\n\n"
+        '    """Typed configuration, validated on load.\n\n'
+        "    An unknown key in ``.env`` is rejected (``extra=\"forbid\"``), so a typo cannot\n"
+        "    read as configured while the default silently stays in force. Declare a field\n"
+        "    here before adding its key to ``.env.example``; ``tests/test_config.py`` checks\n"
+        "    the two agree. TODO: add feature flags.\n"
+        '    """\n\n'
+        "    model_config = SettingsConfigDict(env_file=\".env\", extra=\"forbid\")\n\n"
         "    app_env: str = \"development\"\n"
         "    log_level: str = \"info\"\n"
         "    llm_provider: str = \"anthropic\"\n"
-        "    llm_model: str = \"claude-opus-4-8\"\n\n\n"
+        "    # The model default's only home. A pinned model id goes stale: check it is\n"
+        "    # still live in your provider's model list before relying on it.\n"
+        "    llm_model: str = \"claude-opus-5-5\"\n"
+        "    anthropic_api_key: SecretStr = SecretStr(\"\")\n"
+        "    vector_db_url: str = \"\"\n"
+        "    semantic_cache_url: str = \"\"\n\n\n"
         "settings = Settings()\n"
     ),
     "app/schemas.py": (
@@ -230,25 +280,19 @@ FILES: dict[str, str] = {
         "from __future__ import annotations\n\n"
         "from pydantic import BaseModel\n\n\n"
         "class ChatRequest(BaseModel):\n"
+        '    """One user turn sent to ``POST /chat``."""\n\n'
         "    message: str\n"
         "    session_id: str | None = None\n\n\n"
         "class Source(BaseModel):\n"
+        '    """A retrieved document cited in an answer."""\n\n'
         "    title: str\n"
         "    url: str | None = None\n"
         "    score: float | None = None\n\n\n"
         "class ChatResponse(BaseModel):\n"
+        '    """The answer to one turn, with its sources and trace id."""\n\n'
         "    answer: str\n"
         "    sources: list[Source] = []\n"
         "    trace_id: str | None = None\n"
-    ),
-    "app/Dockerfile": (
-        "# API service image. Mirrors the root Dockerfile; kept for per-service builds.\n"
-        "FROM python:3.11-slim\n"
-        "WORKDIR /srv\n"
-        "COPY requirements.txt .\n"
-        "RUN pip install --no-cache-dir -r requirements.txt\n"
-        "COPY . .\n"
-        'CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]\n'
     ),
     # ---- components: retrieval ---------------------------------------------------
     "app/components/__init__.py": PKG_INIT,
@@ -258,13 +302,16 @@ FILES: dict[str, str] = {
         "class HybridRetriever:\n"
         '    """Retrieve candidate documents via dense + sparse search."""\n\n'
         "    def retrieve(self, query: str, k: int = 10) -> list[dict]:\n"
+        '        """Return the top ``k`` candidates for ``query``."""\n'
         "        raise NotImplementedError\n",
     ),
     "app/components/reranker.py": _module(
         "Cross-encoder reranker: reorder retrieved candidates by relevance.",
         "from __future__ import annotations\n\n\n"
         "class Reranker:\n"
+        '    """Reorder retrieved candidates with a cross-encoder."""\n\n'
         "    def rerank(self, query: str, docs: list[dict], top_n: int = 5) -> list[dict]:\n"
+        '        """Return the ``top_n`` most relevant of ``docs``."""\n'
         "        raise NotImplementedError\n",
     ),
     # ---- services: business logic ------------------------------------------------
@@ -273,37 +320,48 @@ FILES: dict[str, str] = {
         "LLM client wrapper: provider-agnostic completion + streaming.",
         "from __future__ import annotations\n\n\n"
         "class LLMService:\n"
+        '    """Provider-agnostic LLM client."""\n\n'
         "    async def complete(self, prompt: str, **kwargs) -> str:\n"
+        '        """Return the completion for ``prompt``."""\n'
         "        raise NotImplementedError\n",
     ),
     "app/services/semantic_cache.py": _module(
         "Semantic cache: return prior answers for embedding-similar queries.",
         "from __future__ import annotations\n\n\n"
         "class SemanticCache:\n"
+        '    """Answer cache keyed by embedding similarity."""\n\n'
         "    async def get(self, query: str) -> str | None:\n"
+        '        """Return a cached answer for a similar query, or ``None``."""\n'
         "        raise NotImplementedError\n\n"
         "    async def set(self, query: str, answer: str) -> None:\n"
+        '        """Store ``answer`` under ``query``."""\n'
         "        raise NotImplementedError\n",
     ),
     "app/services/conversation.py": _module(
         "Conversation memory: persist and summarise multi-turn history.",
         "from __future__ import annotations\n\n\n"
         "class ConversationMemory:\n"
+        '    """Multi-turn history store."""\n\n'
         "    async def history(self, session_id: str) -> list[dict]:\n"
+        '        """Return the turns recorded for ``session_id``."""\n'
         "        raise NotImplementedError\n",
     ),
     "app/services/query_rewriter.py": _module(
         "Query rewriter: expand/clarify the user query for retrieval.",
         "from __future__ import annotations\n\n\n"
         "class QueryRewriter:\n"
+        '    """Rewrite a query using the conversation so far."""\n\n'
         "    async def rewrite(self, query: str, history: list[dict]) -> str:\n"
+        '        """Return ``query`` expanded or clarified for retrieval."""\n'
         "        raise NotImplementedError\n",
     ),
     "app/services/query_router.py": _module(
         "Query router: pick the handling strategy (retrieve, tool, direct).",
         "from __future__ import annotations\n\n\n"
         "class QueryRouter:\n"
+        '    """Choose how a query is handled."""\n\n'
         "    async def route(self, query: str) -> str:\n"
+        '        """Return the strategy name: retrieve, tool or direct."""\n'
         "        raise NotImplementedError\n",
     ),
     # ---- prompts -----------------------------------------------------------------
@@ -316,7 +374,9 @@ FILES: dict[str, str] = {
         "Prompt registry: resolve a prompt by name + version (hot-swappable).",
         "from __future__ import annotations\n\n\n"
         "class PromptRegistry:\n"
+        '    """Lookup of prompt templates by name and version."""\n\n'
         "    def get(self, name: str, version: str = \"latest\") -> str:\n"
+        '        """Return the prompt text for ``name`` at ``version``."""\n'
         "        raise NotImplementedError\n",
     ),
     # ---- agent: orchestration ----------------------------------------------------
@@ -330,20 +390,25 @@ FILES: dict[str, str] = {
         "class Orchestrator:\n"
         '    """Coordinate guardrails, retrieval, tools, and the LLM for one turn."""\n\n'
         "    async def run(self, request: ChatRequest) -> ChatResponse:\n"
+        '        """Answer one chat turn end to end."""\n'
         "        raise NotImplementedError\n"
     ),
     "app/agent/query_decomposer.py": _module(
         "Query decomposer: split a complex query into sub-questions.",
         "from __future__ import annotations\n\n\n"
         "class QueryDecomposer:\n"
+        '    """Split a complex query into sub-questions."""\n\n'
         "    async def decompose(self, query: str) -> list[str]:\n"
+        '        """Return the sub-questions of ``query``."""\n'
         "        raise NotImplementedError\n",
     ),
     "app/agent/adaptive_router.py": _module(
         "Adaptive router: LLM-driven selection of sources/tools per sub-question.",
         "from __future__ import annotations\n\n\n"
         "class AdaptiveRouter:\n"
+        '    """Pick sources and tools per sub-question."""\n\n'
         "    async def select(self, sub_query: str) -> list[str]:\n"
+        '        """Return the names of the sources/tools to use."""\n'
         "        raise NotImplementedError\n",
     ),
     "app/agent/tools/__init__.py": PKG_INIT,
@@ -367,18 +432,21 @@ FILES: dict[str, str] = {
         "Input guardrail: validate/sanitise the incoming query.",
         "from __future__ import annotations\n\n\n"
         "def check_input(message: str) -> bool:\n"
+        '    """Return whether ``message`` is acceptable input."""\n'
         "    raise NotImplementedError\n",
     ),
     "app/eval/context_filter.py": _module(
         "Context guardrail: drop irrelevant/unsafe retrieved context.",
         "from __future__ import annotations\n\n\n"
         "def filter_context(docs: list[dict]) -> list[dict]:\n"
+        '    """Return ``docs`` without irrelevant or unsafe entries."""\n'
         "    raise NotImplementedError\n",
     ),
     "app/eval/output_quality.py": _module(
         "Output guardrail: check the generated answer before returning it.",
         "from __future__ import annotations\n\n\n"
         "def check_output(answer: str) -> bool:\n"
+        '    """Return whether ``answer`` is safe to return."""\n'
         "    raise NotImplementedError\n",
     ),
     # ---- tracing: observability --------------------------------------------------
@@ -387,19 +455,23 @@ FILES: dict[str, str] = {
         "Per-stage tracing: spans around each pipeline step.",
         "from __future__ import annotations\n\n\n"
         "def start_span(name: str):\n"
+        '    """Open a tracing span called ``name``."""\n'
         "    raise NotImplementedError\n",
     ),
     "app/tracing/feedback.py": _module(
         "Feedback capture: persist user thumbs-up/down and corrections.",
         "from __future__ import annotations\n\n\n"
         "def record_feedback(trace_id: str, score: int) -> None:\n"
+        '    """Persist the ``score`` given for ``trace_id``."""\n'
         "    raise NotImplementedError\n",
     ),
     "app/tracing/cost_tracker.py": _module(
         "Cost tracker: accumulate token/$ cost per request.",
         "from __future__ import annotations\n\n\n"
         "class CostTracker:\n"
+        '    """Running token and cost totals for one request."""\n\n'
         "    def add(self, tokens: int, model: str) -> None:\n"
+        '        """Add ``tokens`` used on ``model`` to the totals."""\n'
         "        raise NotImplementedError\n",
     ),
     # ---- data --------------------------------------------------------------------
@@ -412,6 +484,7 @@ FILES: dict[str, str] = {
         "Seed script: load initial documents into the index.",
         "from __future__ import annotations\n\n\n"
         "def main() -> None:\n"
+        '    """Load the initial documents."""\n'
         "    raise NotImplementedError\n\n\n"
         'if __name__ == "__main__":\n'
         "    main()\n",
@@ -420,6 +493,7 @@ FILES: dict[str, str] = {
         "Migration script: apply schema/index migrations.",
         "from __future__ import annotations\n\n\n"
         "def main() -> None:\n"
+        '    """Apply pending migrations."""\n'
         "    raise NotImplementedError\n\n\n"
         'if __name__ == "__main__":\n'
         "    main()\n",
@@ -428,6 +502,7 @@ FILES: dict[str, str] = {
         "Healthcheck script: probe dependencies (LLM, vector store, cache).",
         "from __future__ import annotations\n\n\n"
         "def main() -> int:\n"
+        '    """Probe each dependency; return a process exit code."""\n'
         "    raise NotImplementedError\n\n\n"
         'if __name__ == "__main__":\n'
         "    raise SystemExit(main())\n",
@@ -452,6 +527,31 @@ FILES: dict[str, str] = {
     ),
     # ---- tests -------------------------------------------------------------------
     "tests/__init__.py": PKG_INIT,
+    "tests/test_config.py": (
+        '"""Settings tests: configuration is validated on load."""\n'
+        "from pathlib import Path\n\n"
+        "import pytest\n"
+        "from pydantic import ValidationError\n\n"
+        "from app.config import Settings\n\n"
+        "ROOT = Path(__file__).resolve().parents[1]\n\n\n"
+        "def test_env_example_offers_only_declared_settings() -> None:\n"
+        '    Settings(_env_file=ROOT / ".env.example")\n\n\n'
+        "def test_unknown_key_in_env_file_is_rejected(tmp_path: Path) -> None:\n"
+        '    env = tmp_path / ".env"\n'
+        '    env.write_text("LLM_MODLE=typo\\n")\n'
+        "    with pytest.raises(ValidationError):\n"
+        "        Settings(_env_file=env)\n"
+    ),
+    "tests/test_health.py": (
+        '"""API smoke test: the app boots and the liveness probe answers."""\n'
+        "from fastapi.testclient import TestClient\n\n"
+        "from app.config import settings\n"
+        "from app.main import app\n\n\n"
+        "def test_health_reports_ok_and_the_environment() -> None:\n"
+        '    response = TestClient(app).get("/health")\n'
+        "    assert response.status_code == 200\n"
+        '    assert response.json() == {"status": "ok", "env": settings.app_env}\n'
+    ),
     "tests/test_retrieval.py": (
         '"""Retrieval tests (scaffold stubs)."""\n'
         "import pytest\n\n\n"
@@ -519,6 +619,8 @@ def scaffold(target: Path) -> int:
         if path.exists():
             skipped.append(rel)
             continue
+        if rel == "README.md":
+            content = content.replace(README_TITLE, f"# {target.resolve().name}\n", 1)
         path.write_text(content, encoding="utf-8")
         created.append(rel)
 
