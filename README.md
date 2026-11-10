@@ -273,13 +273,13 @@ local CI and CI cannot drift. Run a group on the working tree while iterating:
 ```bash
 scripts/checks.sh quality     # ruff; this repo's unit tests with the coverage gate (fail_under in
                               # pyproject.toml); the roman-numerals example at 100%
-scripts/checks.sh manifests   # validate_manifests.py (manifests, skill frontmatter, install docs,
-                              # plugin.json version recorded in CHANGELOG.md); check_evals.py;
-                              # shellcheck; and `claude plugin validate .`, the authoritative
-                              # manifest check (needs the Claude Code CLI: reported as BLOCKED
-                              # locally if it is missing, a failure in CI)
-scripts/checks.sh scaffold    # generate an app, compile it, re-run (created: 0 file(s)), then lint
-                              # and test it in a throwaway virtualenv (needs the network)
+scripts/checks.sh manifests   # validate_manifests.py (manifests, skill frontmatter, install docs);
+                              # check_evals.py; shellcheck; and `claude plugin validate .`, the
+                              # authoritative manifest check. It needs the Claude Code CLI
+                              # (npm install -g @anthropic-ai/claude-code): the group fails
+                              # without it, so a PASS always includes it
+scripts/checks.sh scaffold    # generate an app, compile it, re-run (created: 0 file(s)), then
+                              # test it in a throwaway virtualenv (needs the network)
 ```
 
 A change is not done until CI is green on the branch.

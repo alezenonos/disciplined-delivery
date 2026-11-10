@@ -39,10 +39,11 @@ jobs:
           python-version: "3.13"
       - name: Install dev tools
         run: pip install -r requirements-dev.txt
-      # Deliberately the latest CLI, not a pin: it is what a user installs the plugin with, so
-      # a manifest it rejects is broken for them whatever an older validator says.
+      # Pinned like every other tool. Dependabot cannot see a version in a run line, so this
+      # pin is bumped by hand: check `npm view @anthropic-ai/claude-code version` when cutting
+      # a release. (2.1.322 was the latest on 2026-11-10.)
       - name: Install the Claude Code CLI (for `claude plugin validate`)
-        run: npm install -g @anthropic-ai/claude-code
+        run: npm install -g @anthropic-ai/claude-code@2.1.322
       - name: Manifests, skill frontmatter, eval cases, shellcheck, claude plugin validate
         run: scripts/checks.sh manifests
 

@@ -37,7 +37,8 @@ Layout: `.claude-plugin/` (`plugin.json` + `marketplace.json`), `skills/<name>/S
   claim done, **on a clean checkout of the commit, never the working tree**, and name the SHA
   in the PR:
   ```bash
-  pip install -r requirements-dev.txt         # the pinned tools the checks need
+  pip install -r requirements-dev.txt         # the pinned tools the checks need (the manifests
+                                              # group also needs the Claude Code CLI)
   scripts/ci_local.sh --merge-preview         # every CI check (ruff, pytest + coverage gate,
                                               # manifests, evals, shellcheck, claude plugin
                                               # validate, scaffold) in a temp checkout of HEAD

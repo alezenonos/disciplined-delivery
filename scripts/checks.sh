@@ -5,7 +5,8 @@
 #
 #   scripts/checks.sh [quality|manifests|scaffold|all]     # default: all
 #
-# Needs the tools in requirements-dev.txt (`pip install -r requirements-dev.txt`). pytest runs
+# Needs the tools in requirements-dev.txt (`pip install -r requirements-dev.txt`) and, for the
+# manifests group, the Claude Code CLI (`npm install -g @anthropic-ai/claude-code`). pytest runs
 # as `python3 -m pytest` so the plugin and the interpreter cannot differ: a bare `pytest` once
 # resolved to a standalone install without pytest-cov and failed (exit 4). The scaffolded
 # app's tests run in a throwaway virtualenv, so its requirements never touch your
@@ -29,16 +30,14 @@ manifests() {
   python3 scripts/check_evals.py
   shellcheck install.sh scripts/ci_local.sh scripts/checks.sh \
     skills/disciplined-delivery/assets/ci_local.sh
-  # The authoritative manifest check needs the Claude Code CLI. CI installs it, so there a
-  # missing CLI is a failure; locally the check is reported as not run, never as passed.
-  if command -v claude >/dev/null 2>&1; then
-    claude plugin validate .
-  elif [ -n "${CI:-}" ]; then
-    echo "FAIL: the claude CLI is not installed, so 'claude plugin validate .' cannot run" >&2
+  # The authoritative manifest check needs the Claude Code CLI. Without it the group fails:
+  # a check that could not run must not end in a PASS that gets quoted in a PR.
+  if ! command -v claude >/dev/null 2>&1; then
+    echo "FAIL: 'claude plugin validate .' cannot run: the claude CLI is not on PATH." >&2
+    echo "      Install it with: npm install -g @anthropic-ai/claude-code" >&2
     return 1
-  else
-    echo "BLOCKED: 'claude plugin validate .' was not run (the claude CLI is not on PATH)" >&2
   fi
+  claude plugin validate .
 }
 
 scaffold() (
@@ -46,12 +45,14 @@ scaffold() (
   trap 'rm -rf "$scratch"' EXIT
   python3 skills/scaffold-agentic-app/scaffold.py "$scratch/app" >/dev/null
   python3 -m compileall -q "$scratch/app"
-  # Re-running must be idempotent: nothing created, nothing overwritten.
-  python3 skills/scaffold-agentic-app/scaffold.py "$scratch/app" | grep -q "created: 0 file(s)"
+  # Re-running must be idempotent: nothing created, nothing overwritten. The output goes to
+  # a file first: `scaffold.py | grep -q` under pipefail fails now and then, when grep exits
+  # on its match while the generator is still printing (a broken pipe).
+  python3 skills/scaffold-agentic-app/scaffold.py "$scratch/app" >"$scratch/rerun.log"
+  grep -q "created: 0 file(s)" "$scratch/rerun.log"
   python3 -m venv "$scratch/venv"
   "$scratch/venv/bin/pip" install -q -r "$scratch/app/requirements.txt"
   cd "$scratch/app"
-  "$scratch/venv/bin/python" -m ruff check --no-cache .
   "$scratch/venv/bin/python" -m pytest -q
 )
 

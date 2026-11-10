@@ -49,11 +49,11 @@ The project follows [Semantic Versioning](https://semver.org/) and keeps a
 [`CHANGELOG.md`](CHANGELOG.md). To cut a release:
 
 1. Move the `Unreleased` entries under a new `## [x.y.z] - YYYY-MM-DD` heading.
-2. Bump `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) to match
-   (`scripts/validate_manifests.py` fails if the version has no changelog heading). Installed
-   users are only offered an update when this version changes, so merged work reaches nobody
-   until a release is cut.
-3. Tag and push using the marketplace convention `<plugin>--v<version>`:
+2. Bump `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) to match.
+3. Check the Claude Code CLI pin in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+   against `npm view @anthropic-ai/claude-code version` and bump it if it is behind
+   (Dependabot cannot see that pin).
+4. Tag and push using the marketplace convention `<plugin>--v<version>`:
    ```bash
    claude plugin tag --push        # creates disciplined-delivery--v<version>
    ```
