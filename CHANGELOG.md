@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-10
+
 ### Added
 - `README.md`: a copy-paste prompt for having an agent install the plugin, and install steps for
   **GitHub Copilot** (CLI, VS Code, cloud agent).
