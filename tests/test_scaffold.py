@@ -124,10 +124,49 @@ def test_every_generated_dockerfile_is_built_by_compose(tmp_path: Path) -> None:
         assert rel == "Dockerfile" or f"dockerfile: {rel}" in compose, rel
 
 
-def test_readme_title_is_the_target_directory_name(tmp_path: Path) -> None:
+def test_project_name_is_the_target_directory_everywhere_it_appears(tmp_path: Path) -> None:
+    # One name, three homes (README title, package name, API title): they must agree.
     target = tmp_path / "my-rag-service"
     _run(str(target))
     assert (target / "README.md").read_text().splitlines()[0] == "# my-rag-service"
+    assert 'name = "my-rag-service"' in (target / "pyproject.toml").read_text()
+    assert 'FastAPI(title="my-rag-service"' in (target / "app" / "main.py").read_text()
+    leftovers = [
+        p.relative_to(target).as_posix()
+        for p in target.rglob("*")
+        if p.is_file() and "production-ai-app" in p.read_text(encoding="utf-8")
+    ]
+    assert leftovers == []
+
+
+def test_project_name_is_made_a_valid_package_name(tmp_path: Path) -> None:
+    target = tmp_path / "My RAG app!"
+    _run(str(target))
+    assert 'name = "My-RAG-app"' in (target / "pyproject.toml").read_text()
+    assert (target / "README.md").read_text().splitlines()[0] == "# My-RAG-app"
+
+
+def test_project_name_falls_back_when_the_directory_has_none() -> None:
+    # A filesystem root has an empty name; a name with no usable character sanitises to "".
+    sys.path.insert(0, str(SCAFFOLD.parent))
+    try:
+        import scaffold
+    finally:
+        sys.path.pop(0)
+    assert scaffold.project_name(Path("/")) == "production-ai-app"
+    assert scaffold.project_name(Path("/tmp/!!!")) == "production-ai-app"
+    assert scaffold.project_name(Path("/tmp/my-rag-service")) == "my-rag-service"
+
+
+def test_generated_linter_is_pinned(tmp_path: Path) -> None:
+    # The generated lint config selects whole rule families, so a new ruff release can add
+    # rules: an unpinned ruff would fail a freshly scaffolded app's first CI run.
+    target = tmp_path / "app"
+    _run(str(target))
+    requirements = (target / "requirements.txt").read_text().splitlines()
+    ruff = [line for line in requirements if line.startswith("ruff")]
+    assert len(ruff) == 1 and re.fullmatch(r"ruff==\d+\.\d+\.\d+", ruff[0]), ruff
+    assert "package-ecosystem: pip" in (target / ".github" / "dependabot.yml").read_text()
 
 
 def test_generated_app_passes_its_own_linter(tmp_path: Path) -> None:

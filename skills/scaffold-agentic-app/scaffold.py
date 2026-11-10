@@ -19,6 +19,7 @@ component collides with an existing file).
 """
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -40,13 +41,14 @@ def _module(summary: str, body: str = "") -> str:
 # A trailing empty string for a ``.gitkeep`` keeps an otherwise-empty dir.
 # --------------------------------------------------------------------------- #
 
-# The README's first line; ``scaffold`` replaces it with the target directory's name.
-README_TITLE = "# production-ai-app\n"
+# The project name the templates below are written with. ``scaffold`` replaces it, wherever
+# it appears, with a name derived from the target directory (see ``project_name``).
+DEFAULT_NAME = "production-ai-app"
 
 FILES: dict[str, str] = {
     # ---- top-level project files -------------------------------------------------
     "README.md": (
-        f"{README_TITLE}\n"
+        f"# {DEFAULT_NAME}\n\n"
         "Production RAG-style LLM application with an agentic layer. Scaffolded by the\n"
         "`scaffold-agentic-app` skill. See `architecture.md` for the design and\n"
         "`deployment.md` to run it.\n\n"
@@ -100,11 +102,13 @@ FILES: dict[str, str] = {
         "httpx>=0.27\n"
         "# dev tools: the tests and the linter CI runs\n"
         "pytest>=8.0\n"
-        "ruff>=0.6\n"
+        "# Pinned: the lint config selects whole rule families, so a new ruff can add rules.\n"
+        "# Dependabot (.github/dependabot.yml) proposes the bumps.\n"
+        "ruff==0.17.4\n"
     ),
     "pyproject.toml": (
         "[project]\n"
-        'name = "production-ai-app"\n'
+        f'name = "{DEFAULT_NAME}"\n'
         'version = "0.1.0"\n'
         'description = "Production RAG-style LLM app with an agentic layer."\n'
         'requires-python = ">=3.11"\n\n'
@@ -236,7 +240,7 @@ FILES: dict[str, str] = {
         "from fastapi import FastAPI\n\n"
         "from app.config import settings\n"
         "from app.schemas import ChatRequest, ChatResponse\n\n"
-        "app = FastAPI(title=\"production-ai-app\", version=\"0.1.0\")\n\n\n"
+        f"app = FastAPI(title=\"{DEFAULT_NAME}\", version=\"0.1.0\")\n\n\n"
         "@app.get(\"/health\")\n"
         "def health() -> dict[str, str]:\n"
         '    """Liveness probe."""\n'
@@ -258,10 +262,14 @@ FILES: dict[str, str] = {
         "from pydantic_settings import BaseSettings, SettingsConfigDict\n\n\n"
         "class Settings(BaseSettings):\n"
         '    """Typed configuration, validated on load.\n\n'
-        "    An unknown key in ``.env`` is rejected (``extra=\"forbid\"``), so a typo cannot\n"
-        "    read as configured while the default silently stays in force. Declare a field\n"
-        "    here before adding its key to ``.env.example``; ``tests/test_config.py`` checks\n"
-        "    the two agree. TODO: add feature flags.\n"
+        "    An unknown key in the ``.env`` file is rejected (``extra=\"forbid\"``), so a typo\n"
+        "    there cannot read as configured while the default silently stays in force.\n"
+        "    Declare a field here before adding its key to ``.env.example``;\n"
+        "    ``tests/test_config.py`` checks the two agree.\n\n"
+        "    Limit: this covers the file only. Under ``docker compose`` the same keys arrive\n"
+        "    as environment variables (``.env`` is kept out of the image), and an unknown\n"
+        "    environment variable cannot be told from the system's own, so it is ignored.\n\n"
+        "    TODO: add feature flags.\n"
         '    """\n\n'
         "    model_config = SettingsConfigDict(env_file=\".env\", extra=\"forbid\")\n\n"
         "    app_env: str = \"development\"\n"
@@ -583,6 +591,18 @@ _MARKER_BEGIN = "<!-- BEGIN scaffold-agentic-app -->"
 _MARKER_END = "<!-- END scaffold-agentic-app -->"
 
 
+def project_name(target: Path) -> str:
+    """Return the project name for ``target``: its directory name as a valid package name.
+
+    The name is written into the README title, ``pyproject.toml`` and the API title, so it
+    is reduced to what a package name allows (letters, digits, ``.``, ``_``, ``-``, starting
+    and ending alphanumeric). A directory with no usable name, such as a filesystem root,
+    falls back to ``DEFAULT_NAME``.
+    """
+    name = re.sub(r"[^A-Za-z0-9._-]+", "-", target.resolve().name).strip("-._")
+    return name or DEFAULT_NAME
+
+
 def _scaffold_block(content: str) -> str:
     """Wrap generated content in idempotency markers so re-runs don't duplicate it."""
     return f"{_MARKER_BEGIN}\n{content.rstrip()}\n{_MARKER_END}\n"
@@ -593,9 +613,11 @@ def scaffold(target: Path) -> int:
     created: list[str] = []
     appended: list[str] = []
     skipped: list[str] = []
+    name = project_name(target)
 
     for rel, content in FILES.items():
         path = target / rel
+        content = content.replace(DEFAULT_NAME, name)
         try:
             path.parent.mkdir(parents=True, exist_ok=True)
         except FileExistsError:
@@ -619,8 +641,6 @@ def scaffold(target: Path) -> int:
         if path.exists():
             skipped.append(rel)
             continue
-        if rel == "README.md":
-            content = content.replace(README_TITLE, f"# {target.resolve().name}\n", 1)
         path.write_text(content, encoding="utf-8")
         created.append(rel)
 
@@ -637,7 +657,7 @@ def scaffold(target: Path) -> int:
 
 def main(argv: list[str]) -> int:
     """Scaffold into ``argv[1]`` (or the default dir) and return scaffold's exit code."""
-    target = Path(argv[1]) if len(argv) > 1 else Path("production-ai-app")
+    target = Path(argv[1]) if len(argv) > 1 else Path(DEFAULT_NAME)
     return scaffold(target)
 
 

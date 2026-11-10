@@ -28,6 +28,7 @@ one), throwaway spikes, or non-Python stacks.
 ## How to invoke
 
 Run the bundled generator, passing the target directory (defaults to `production-ai-app`).
+The project takes its name from that directory (README title, package name, API title).
 The generator lives alongside this skill, so reference it via `${CLAUDE_SKILL_DIR}`:
 
 ```bash

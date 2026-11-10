@@ -11,7 +11,7 @@ output guardrail**, with tracing and cost tracking wrapped around every stage.
 production-ai-app/
 ├── app/
 │   ├── main.py             # FastAPI entry: app, /chat + /health, schema wiring
-│   ├── config.py           # Pydantic Settings, validated on load (unknown .env keys fail)
+│   ├── config.py           # Pydantic Settings, validated on load (an unknown key in the .env file fails)
 │   ├── schemas.py          # ChatRequest / Source / ChatResponse models
 │   ├── components/         # Retrieval layer
 │   │   ├── retriever.py    #   hybrid (dense + sparse) search
