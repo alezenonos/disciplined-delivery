@@ -6,7 +6,7 @@
 | Last edited | 2026-11-10 |
 | Author | Claude Code (cloud session) |
 | Human partner | alezenonos |
-| Status | In progress: changes made and checked locally; CI has not run on them |
+| Status | In progress: committed and checked locally on a clean checkout; CI has not run on them |
 | Related | branch `ccr-94f8b1bc-vmo0co` |
 
 ## Task
@@ -59,8 +59,10 @@ were untested.
 
 ## Verification / evidence
 
-All on the **working tree** at base `2fb7057`, not yet on a clean checkout of a commit (the
-changes were uncommitted when this was written):
+`scripts/ci_local.sh --merge-preview` on the committed result: `local CI for bf39a7c: PASS (a
+clean checkout of bf39a7c merged with origin/main 2fb7057)`, Python 3.13.18, with the same
+figures as below. The only commit after `bf39a7c` adds this paragraph. Before committing, on
+the working tree:
 
 - `scripts/checks.sh all` on Python 3.13.18: exit 0. ruff clean; 67 passed; coverage 97.12%
   (`validate_manifests.py` 86% → 100%); example 29 passed at 100%; manifests and eval cases
@@ -108,3 +110,4 @@ inspecting an image; any skill eval.
 ## Change log
 
 - 2026-11-10: created.
+- 2026-11-10: recorded the clean-checkout run on `bf39a7c`.
