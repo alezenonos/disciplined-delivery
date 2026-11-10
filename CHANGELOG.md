@@ -6,7 +6,24 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-10
+
 ### Added
+- `scaffold-agentic-app`: the generated app gets a **`.dockerignore`** (its Dockerfiles
+  `COPY . .`, so the `.env` holding real keys was baked into the image), a
+  **`.github/dependabot.yml`**, and two tests that run from the first commit
+  (`tests/test_config.py`, `tests/test_health.py`), so its CI is never green on skipped tests
+  alone.
+- `scripts/checks.sh`: this repo's checks in one script, in groups. CI's jobs and
+  `scripts/ci_local.sh` both call it, and a test fails if the workflow runs a check outside it,
+  so the two cannot drift. `requirements-dev.txt` pins the tools it needs; Dependabot keeps
+  them current.
+- CI now runs **`claude plugin validate .`**, the authoritative manifest check that was only
+  ever run by hand.
+- `scripts/validate_manifests.py`: fails when `plugin.json`'s `version` has **no heading in
+  `CHANGELOG.md`**, and when a skill's `name` is **not its directory name**.
+- `evals/cases/disciplined-delivery.json`: six more **negative** prompts (it had two against
+  ten triggers), mirrored in the pending transcript.
 - `README.md`: a copy-paste prompt for having an agent install the plugin, and install steps for
   **GitHub Copilot** (CLI, VS Code, cloud agent).
 - `scripts/validate_manifests.py`: the install-consistency check now fails when `install.sh` or
@@ -71,6 +88,21 @@ All notable changes to this project are documented here. The format is based on
   **read-only vendor/partner-owned inputs**.
 
 ### Changed
+- `scaffold-agentic-app`: the generated app now meets the standards `disciplined-delivery`
+  sets. Settings **reject unknown `.env` keys** (`extra="forbid"`; the keys `.env.example`
+  offers are declared, the API key as a `SecretStr`); the **model default has one home**
+  (`app/config.py`; `.env.example` no longer repeats it); the generated CI **pins actions to a
+  commit, lints with `ruff`** and runs with read-only permissions; the generated
+  `pyproject.toml` encodes the same lint standard as this repo and **every stub carries a
+  docstring**, so the app passes its own linter; the README is titled after the target
+  directory; `api-reference.md` describes what `/health` returns; `requires-python` is `>=3.11`.
+- `scaffold-agentic-app`: `SKILL.md` says where `scaffold.py` is when `${CLAUDE_SKILL_DIR}` is
+  not set (agents other than Claude Code).
+- CI tests **Python 3.11–3.14** (3.10 reached end of life in October 2026).
+
+### Removed
+- `scaffold-agentic-app`: the generated `app/Dockerfile`, an unused copy of the root
+  `Dockerfile` that nothing built.
 - `disciplined-delivery`: the **PR template is now enforced by a check**, not only required by
   prose, and PR bodies must carry the known limits; a gate must render in an enforcing surface
   (template checkbox worded for every case, CI check, or refusing script), kept in proportion
@@ -91,6 +123,8 @@ All notable changes to this project are documented here. The format is based on
   copy once installed elsewhere.
 
 ### Fixed
+- `scripts/validate_manifests.py`: skill frontmatter is read as top-level `key: value` lines; a
+  `name:` that only appeared inside the description's text used to satisfy the check.
 - `assets/ci_local.sh`: the trap-only `cleanup()` now silences both **SC2317** (shellcheck before
   0.11, as on CI's Ubuntu runners) and **SC2329** (0.11+); silencing only SC2329 failed
   shellcheck in CI and in any consuming repo on an older shellcheck.
