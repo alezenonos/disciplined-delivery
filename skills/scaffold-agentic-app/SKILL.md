@@ -28,11 +28,15 @@ one), throwaway spikes, or non-Python stacks.
 ## How to invoke
 
 Run the bundled generator, passing the target directory (defaults to `production-ai-app`).
+The project takes its name from that directory (README title, package name, API title).
 The generator lives alongside this skill, so reference it via `${CLAUDE_SKILL_DIR}`:
 
 ```bash
 python "${CLAUDE_SKILL_DIR}/scaffold.py" path/to/production-ai-app
 ```
+
+If `${CLAUDE_SKILL_DIR}` is not set (agents other than Claude Code, such as GitHub Copilot),
+run the `scaffold.py` that sits in the same directory as this `SKILL.md`.
 
 It is **idempotent and safe**: existing files are skipped and reported, never overwritten.
 Re-running only fills in what is missing. The exception is project-memory files (`CLAUDE.md`,
@@ -48,7 +52,7 @@ behind each gap that was filled beyond the original diagram.
 ```
 <target>/
 ├── app/
-│   ├── main.py config.py schemas.py Dockerfile
+│   ├── main.py config.py schemas.py
 │   ├── components/   retriever.py reranker.py            # hybrid search + rerank
 │   ├── services/     llm.py semantic_cache.py conversation.py query_rewriter.py query_router.py
 │   ├── prompts/      system.py registry.py               # versioned, hot-swappable
@@ -59,18 +63,21 @@ behind each gap that was filled beyond the original diagram.
 │   ├── data/         raw/ processed/ index_config/
 │   ├── scripts/      seed.py migrate.py healthcheck.py
 │   └── ui/           app.py Dockerfile
-├── tests/            test_retrieval.py test_cache.py test_routing.py
+├── tests/            test_config.py test_health.py           # run from day one
+│                     test_retrieval.py test_cache.py test_routing.py   # skipped stubs
 ├── architecture.md api-reference.md deployment.md
 ├── CLAUDE.md AGENTS.md README.md
 ├── requirements.txt pyproject.toml Dockerfile docker-compose.yml
-├── .env.example .gitignore
-└── .github/workflows/ci.yml
+├── .env.example .gitignore .dockerignore
+└── .github/           workflows/ci.yml dependabot.yml
 ```
 
 ## After scaffolding
 
-1. `cp .env.example .env` and fill in keys.
+1. `cp .env.example .env` and fill in keys. Settings are validated on load: a key in `.env`
+   that `app/config.py` does not declare stops the app, so declare it there first.
 2. `pip install -r requirements.txt` then `uvicorn app.main:app --reload`; hit `GET /health`.
 3. From here, use **`disciplined-delivery`** for every change: one focused, test-first,
    reviewable increment at a time. Replace `raise NotImplementedError` stubs as you go,
-   un-skipping the matching tests in `tests/`.
+   un-skipping the matching tests in `tests/`. `ruff check . && pytest` is what the
+   generated CI runs.

@@ -9,6 +9,11 @@ All notable changes to this project are documented here. The format is based on
 ### Added
 - `README.md`: a copy-paste prompt for having an agent install the plugin, and install steps for
   **GitHub Copilot** (CLI, VS Code, cloud agent).
+- `scaffold-agentic-app`: the generated app gets a **`.dockerignore`** (its Dockerfiles
+  `COPY . .`, so the `.env` holding real keys was baked into the image), a
+  **`.github/dependabot.yml`**, and two tests that run from the first commit
+  (`tests/test_config.py`, `tests/test_health.py`), so its CI is never green on skipped tests
+  alone.
 - `scripts/validate_manifests.py`: the install-consistency check now fails when `install.sh` or
   `README.md` never adds the marketplace a dependency resolves from, the drift that left
   0.2.2's docs pointing at the legacy `superpowers-marketplace` while CI stayed green. In the
@@ -89,6 +94,21 @@ All notable changes to this project are documented here. The format is based on
 - `disciplined-delivery`: the PR-template reference now points at **the consuming repo's**
   `.github/PULL_REQUEST_TEMPLATE.md` instead of a relative path that resolved to this plugin's own
   copy once installed elsewhere.
+- `scaffold-agentic-app`: the generated app now meets the standards `disciplined-delivery`
+  sets. Settings **reject an unknown key in the `.env` file** (`extra="forbid"`; the keys
+  `.env.example` offers are declared, the API key as a `SecretStr`). The **model default has
+  one home** (`app/config.py`; `.env.example` no longer repeats it). The generated CI **pins
+  actions to a commit, lints with a pinned `ruff`** and runs with read-only permissions. The
+  generated `pyproject.toml` encodes the same lint standard as this repo and **every stub
+  carries a docstring**, so the app passes its own linter. The README title, package name and
+  API title **take the target directory's name**. `api-reference.md` describes what `/health`
+  returns, and `requires-python` is `>=3.11`.
+- `scaffold-agentic-app`: `SKILL.md` says where `scaffold.py` is when `${CLAUDE_SKILL_DIR}` is
+  not set (agents other than Claude Code).
+
+### Removed
+- `scaffold-agentic-app`: the generated `app/Dockerfile`, an unused copy of the root
+  `Dockerfile` that nothing built.
 
 ### Fixed
 - `assets/ci_local.sh`: the trap-only `cleanup()` now silences both **SC2317** (shellcheck before
