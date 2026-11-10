@@ -223,3 +223,152 @@ def test_flags_readme_markers_out_of_order_or_repeated(tmp_path: Path) -> None:
         result = _run(tmp_path)
         assert result.returncode == 1
         assert "README.md has no '<!-- install-check: claude-code -->'" in result.stdout
+
+
+def _plugin_root(tmp_path: Path) -> Path:
+    """A copy of this repo's manifests plus one valid skill: passes until a test breaks it."""
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+    _with_skill(tmp_path)
+    return tmp_path
+
+
+def _rewrite(path: Path, change) -> None:
+    data = json.loads(path.read_text())
+    change(data)
+    path.write_text(json.dumps(data))
+
+
+def test_the_fixture_root_is_valid(tmp_path: Path) -> None:
+    # The failure tests below each break one thing; this pins that nothing else is broken.
+    result = _run(_plugin_root(tmp_path))
+    assert result.returncode == 0, result.stdout
+
+
+def test_flags_missing_and_unparseable_manifests(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    (root / ".claude-plugin" / "plugin.json").unlink()
+    (root / ".claude-plugin" / "marketplace.json").write_text("{not json")
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "missing file" in result.stdout and "plugin.json" in result.stdout
+    assert "invalid JSON" in result.stdout and "marketplace.json" in result.stdout
+
+
+def test_flags_malformed_dependencies(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    _rewrite(root / ".claude-plugin" / "plugin.json",
+             lambda d: d.update(dependencies=[{"marketplace": "x"}, 7]))
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "dependency without a name" in result.stdout
+    assert "dependency must be a string or object: 7" in result.stdout
+
+
+def test_flags_marketplace_missing_required_fields(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    _rewrite(root / ".claude-plugin" / "marketplace.json", lambda d: d.pop("owner"))
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "marketplace.json: missing required field 'owner'" in result.stdout
+
+
+def test_flags_malformed_marketplace_plugin_entries(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    _rewrite(
+        root / ".claude-plugin" / "marketplace.json",
+        lambda d: d["plugins"].extend(
+            [{"source": "./"}, {"name": "no-source"}, {"name": "bad", "source": "plugins/bad"}]
+        ),
+    )
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "plugin entry missing 'name'" in result.stdout
+    assert "plugin 'no-source' missing 'source'" in result.stdout
+    assert "relative source must start with './': 'plugins/bad'" in result.stdout
+
+
+def test_flags_a_root_with_no_skills(tmp_path: Path) -> None:
+    shutil.copytree(REPO / ".claude-plugin", tmp_path / ".claude-plugin")
+
+    result = _run(tmp_path)
+    assert result.returncode == 1
+    assert "no skills found" in result.stdout
+
+
+def test_flags_frontmatter_missing_a_key(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    (root / "skills" / "ok" / "SKILL.md").write_text("---\nname: ok\n---\nbody\n")
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "frontmatter missing 'description'" in result.stdout
+
+
+def test_a_key_mentioned_inside_another_value_does_not_count(tmp_path: Path) -> None:
+    # "name:" inside the description's text is not a name key.
+    root = _plugin_root(tmp_path)
+    (root / "skills" / "ok" / "SKILL.md").write_text(
+        "---\ndescription: Use when the name: field is unclear\n---\nbody\n"
+    )
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "frontmatter missing 'name'" in result.stdout
+
+
+def test_flags_a_skill_whose_name_is_not_its_directory(tmp_path: Path) -> None:
+    # The directory is what the skill is invoked and eval-covered by; a different name drifts.
+    root = _plugin_root(tmp_path)
+    (root / "skills" / "ok" / "SKILL.md").write_text(
+        "---\nname: something-else\ndescription: ok\n---\n"
+    )
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "name 'something-else' does not match its directory 'ok'" in result.stdout
+
+
+def test_flags_a_version_the_changelog_does_not_record(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    _rewrite(root / ".claude-plugin" / "plugin.json", lambda d: d.update(version="9.9.9"))
+    (root / "CHANGELOG.md").write_text("## [Unreleased]\n\n## [9.9.8] - 2026-01-01\n")
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "version '9.9.9' has no '## [9.9.9]' heading in CHANGELOG.md" in result.stdout
+
+    (root / "CHANGELOG.md").write_text("## [Unreleased]\n\n## [9.9.9] - 2026-01-02\n")
+    assert _run(root).returncode == 0
+
+
+def test_flags_an_empty_name(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    (root / "skills" / "ok" / "SKILL.md").write_text("---\nname:\ndescription: ok\n---\n")
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "frontmatter 'name' is empty" in result.stdout
+
+
+def test_a_quoted_name_or_a_trailing_comment_still_matches(tmp_path: Path) -> None:
+    root = _plugin_root(tmp_path)
+    for line in ('name: "ok"', "name: ok  # the skill", "name: 'ok' # the skill"):
+        (root / "skills" / "ok" / "SKILL.md").write_text(f"---\n{line}\ndescription: ok\n---\n")
+        result = _run(root)
+        assert result.returncode == 0, line + "\n" + result.stdout
+
+
+def test_flags_a_version_that_is_not_a_string(tmp_path: Path) -> None:
+    # Reported like every other failure, not a traceback.
+    root = _plugin_root(tmp_path)
+    _rewrite(root / ".claude-plugin" / "plugin.json", lambda d: d.update(version=3))
+    (root / "CHANGELOG.md").write_text("## [3]\n")
+
+    result = _run(root)
+    assert result.returncode == 1
+    assert "plugin.json: 'version' must be a string" in result.stdout
+    assert "Traceback" not in result.stderr

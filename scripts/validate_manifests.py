@@ -77,8 +77,19 @@ def validate_marketplace(root: Path, errors: list[str]) -> None:
             )
 
 
+_FRONTMATTER_KEY = re.compile(r"^([A-Za-z][\w-]*):[ \t]*(.*)$", re.MULTILINE)
+
+
 def validate_skills(root: Path, errors: list[str]) -> None:
-    """Every ``skills/*/SKILL.md`` must declare 'name' and 'description'."""
+    """Every ``skills/*/SKILL.md`` must declare 'name' and 'description'.
+
+    Only a top-level ``key: value`` line counts, so ``name:`` inside another value's
+    text does not. ``name`` must be non-empty and equal the skill's directory: the
+    directory is what the skill is invoked by and what ``check_evals.py`` matches eval
+    cases against. Quotes and a trailing ``# comment`` are not part of the name. A
+    ``description`` is only required to be present, because YAML lets its text start on
+    the next line.
+    """
     skills_dir = root / "skills"
     skill_files = sorted(skills_dir.glob("*/SKILL.md"))
     if not skill_files:
@@ -88,9 +99,19 @@ def validate_skills(root: Path, errors: list[str]) -> None:
         if fm is None:
             errors.append(f"{skill}: missing YAML frontmatter")
             continue
-        for key in ("name:", "description:"):
-            if key not in fm:
-                errors.append(f"{skill}: frontmatter missing '{key.rstrip(':')}'")
+        keys = {key: value.strip() for key, value in _FRONTMATTER_KEY.findall(fm)}
+        for key in ("name", "description"):
+            if key not in keys:
+                errors.append(f"{skill}: frontmatter missing '{key}'")
+        if "name" not in keys:
+            continue
+        name = re.sub(r"(?:^|\s+)#.*$", "", keys["name"]).strip("'\"")
+        if not name:
+            errors.append(f"{skill}: frontmatter 'name' is empty")
+        elif name != skill.parent.name:
+            errors.append(
+                f"{skill}: name '{name}' does not match its directory '{skill.parent.name}'"
+            )
 
 
 README_MARKERS = ("<!-- install-check: claude-code -->", "<!-- /install-check -->")
@@ -187,6 +208,29 @@ def validate_install_consistency(root: Path, errors: list[str]) -> None:
         )
 
 
+def validate_release(root: Path, errors: list[str]) -> None:
+    """The released version must be recorded: ``plugin.json``'s in ``CHANGELOG.md``.
+
+    Claude Code offers an update when ``version`` changes, so a bump with no
+    ``## [<version>]`` heading ships changes nobody can read about. A root with
+    no ``CHANGELOG.md`` or no ``version`` is skipped.
+    """
+    plugin = _load_json(root / ".claude-plugin" / "plugin.json", [])
+    changelog = root / "CHANGELOG.md"
+    if not isinstance(plugin, dict) or not plugin.get("version") or not changelog.is_file():
+        return
+    version = plugin["version"]
+    if not isinstance(version, str):
+        errors.append(f"plugin.json: 'version' must be a string, not {version!r}")
+        return
+    heading = re.compile(rf"^## \[{re.escape(version)}\]", re.MULTILINE)
+    if not heading.search(changelog.read_text(encoding="utf-8")):
+        errors.append(
+            f"release: plugin.json version '{version}' has no '## [{version}]' heading in "
+            "CHANGELOG.md"
+        )
+
+
 def main(argv: list[str]) -> int:
     """Validate all manifests and return ``0`` if they are consistent, else ``1``."""
     root = Path(argv[1]) if len(argv) > 1 else Path(__file__).resolve().parent.parent
@@ -196,13 +240,14 @@ def main(argv: list[str]) -> int:
     validate_marketplace(root, errors)
     validate_skills(root, errors)
     validate_install_consistency(root, errors)
+    validate_release(root, errors)
 
     if errors:
         print(f"✗ {len(errors)} validation error(s):")
         for err in errors:
             print(f"  - {err}")
         return 1
-    print("✓ manifests, skill frontmatter, and install consistency are valid")
+    print("✓ manifests, skill frontmatter, install consistency, and release record are valid")
     return 0
 
 
