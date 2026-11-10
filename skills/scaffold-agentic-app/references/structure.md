@@ -11,9 +11,8 @@ output guardrail**, with tracing and cost tracking wrapped around every stage.
 production-ai-app/
 ├── app/
 │   ├── main.py             # FastAPI entry: app, /chat + /health, schema wiring
-│   ├── config.py           # Pydantic Settings from the environment
+│   ├── config.py           # Pydantic Settings, validated on load (unknown .env keys fail)
 │   ├── schemas.py          # ChatRequest / Source / ChatResponse models
-│   ├── Dockerfile          # API service image
 │   ├── components/         # Retrieval layer
 │   │   ├── retriever.py    #   hybrid (dense + sparse) search
 │   │   └── reranker.py     #   cross-encoder reranking
@@ -44,13 +43,13 @@ production-ai-app/
 │   ├── data/               # raw → processed → index_config (kept via .gitkeep)
 │   ├── scripts/            # seed.py, migrate.py, healthcheck.py
 │   └── ui/                 # app.py + Dockerfile (chat UI calling the API)
-├── tests/                  # test_retrieval / test_cache / test_routing (CI-ready)
+├── tests/                  # test_config / test_health run; retrieval / cache / routing are skipped stubs
 ├── architecture.md  api-reference.md  deployment.md
 ├── CLAUDE.md  AGENTS.md  README.md            # AI agent context + human readme
 ├── requirements.txt  pyproject.toml
-├── Dockerfile  docker-compose.yml
+├── Dockerfile  docker-compose.yml  .dockerignore   # API image; .env never enters an image
 ├── .env.example  .gitignore
-└── .github/workflows/ci.yml
+└── .github/                # workflows/ci.yml (ruff + pytest, SHA-pinned actions), dependabot.yml
 ```
 
 ## Why these layers
@@ -72,7 +71,14 @@ The source diagram omitted a few things that a working repo needs; the generator
 - **`app/schemas.py`** — the Pydantic models `main.py` depends on (the diagram referenced
   schemas in a comment but shipped no file).
 - **`.env.example`, `README.md`, `.gitignore`** — onboarding and hygiene basics.
-- **`.github/workflows/ci.yml`** — the diagram labelled tests "CI-ready" but had no CI.
+- **`.github/workflows/ci.yml`** — the diagram labelled tests "CI-ready" but had no CI. It
+  lints (`ruff`, with the style standard in `pyproject.toml`) and tests, with actions pinned
+  to a commit and **`.github/dependabot.yml`** keeping the pins current.
+- **`.dockerignore`** — every Dockerfile does `COPY . .`, so without it the `.env` holding
+  real keys would be baked into the image.
+- **`tests/test_config.py`, `tests/test_health.py`** — two tests that run from the first
+  commit (settings reject unknown keys; the app boots and `/health` answers), so the
+  generated CI is never green on skipped tests alone.
 - **`Dockerfile`** — the diagram showed `Dockerfile.py` (a typo); a Dockerfile has no
   extension.
 - **`data/{raw,processed,index_config}/.gitkeep`** — so the empty data dirs are tracked.
