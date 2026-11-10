@@ -222,13 +222,14 @@ evidence in `references/evidence.md`. This repo uses all three assets on itself.
 CLAUDE.md             # project memory + working principles (after Karpathy)
 README.md  LICENSE  CONTRIBUTING.md  CHANGELOG.md  install.sh
 pyproject.toml        # ruff + pytest config
+requirements-dev.txt  # the pinned tools the checks need
 .claude-plugin/
   plugin.json         # plugin manifest + dependencies
   marketplace.json    # marketplace catalog (self-hosts this plugin)
 .github/
-  workflows/ci.yml    # CI (Python 3.10-3.13 matrix; SHA-pinned actions)
+  workflows/ci.yml    # CI (Python matrix; SHA-pinned actions); each job runs a group of scripts/checks.sh
   workflows/pr-template.yml  # PR description checked against the template (the shipped checker)
-  dependabot.yml      # keeps the pinned actions current
+  dependabot.yml      # keeps the pinned actions and dev tools current
   PULL_REQUEST_TEMPLATE.md
 docs/
   reports/            # one task report per change (_TEMPLATE.md + dated reports)
@@ -239,7 +240,8 @@ examples/
   roman-numerals/     # worked example of the disciplined-delivery loop (lib + CLI + tests)
 scripts/
   validate_manifests.py  check_evals.py
-  ci_local.sh         # CI's checks on a clean checkout of HEAD (wraps the shipped runner)
+  checks.sh           # the checks themselves, in groups; CI and ci_local.sh both call it
+  ci_local.sh         # checks.sh on a clean checkout of HEAD (wraps the shipped runner)
 skills/
   disciplined-delivery/
     SKILL.md
@@ -261,32 +263,23 @@ CI (`.github/workflows/ci.yml`) runs on every push and PR. Reproduce it locally 
 checkout of the commit** (the working tree does not count; quote the SHA it prints in the PR):
 
 ```bash
-pip install ruff pytest pytest-cov
-scripts/ci_local.sh --merge-preview   # steps 1-2 below, in a temp checkout of HEAD merged with origin/main
+pip install -r requirements-dev.txt   # ruff, pytest, pytest-cov, shellcheck — pinned
+scripts/ci_local.sh --merge-preview   # every check below, in a temp checkout of HEAD merged with origin/main
 ```
 
-The individual steps:
+The checks live in one script, `scripts/checks.sh`, which CI calls too (one group per job), so
+local CI and CI cannot drift. Run a group on the working tree while iterating:
 
 ```bash
-# 1. Lint and unit-test this repo's own tooling (with the coverage gate CI enforces)
-pip install ruff pytest pytest-cov
-ruff check .
-COVERAGE_PROCESS_START="$PWD/pyproject.toml" pytest -q --cov --cov-report=term-missing
-# threshold (fail_under) lives in [tool.coverage.report] in pyproject.toml;
-# COVERAGE_PROCESS_START is needed because the tests spawn subprocesses.
-
-# 2. Validate plugin/marketplace manifests, skill frontmatter, and eval cases
-python scripts/validate_manifests.py
-python scripts/check_evals.py
-
-# 3. Authoritative manifest check (requires the Claude Code CLI)
-claude plugin validate .
-
-# 4. Scaffold generator self-test: generate, compile, prove idempotency, test
-python skills/scaffold-agentic-app/scaffold.py /tmp/app
-python -m compileall -q /tmp/app
-python skills/scaffold-agentic-app/scaffold.py /tmp/app   # re-run: created: 0 file(s)
-( cd /tmp/app && pip install -r requirements.txt && pytest -q )
+scripts/checks.sh quality     # ruff; this repo's unit tests with the coverage gate (fail_under in
+                              # pyproject.toml); the roman-numerals example at 100%
+scripts/checks.sh manifests   # validate_manifests.py (manifests, skill frontmatter, install docs,
+                              # plugin.json version recorded in CHANGELOG.md); check_evals.py;
+                              # shellcheck; and `claude plugin validate .`, the authoritative
+                              # manifest check (needs the Claude Code CLI: reported as BLOCKED
+                              # locally if it is missing, a failure in CI)
+scripts/checks.sh scaffold    # generate an app, compile it, re-run (created: 0 file(s)), then lint
+                              # and test it in a throwaway virtualenv (needs the network)
 ```
 
 A change is not done until CI is green on the branch.
