@@ -14,7 +14,13 @@
   ],
   "negatives": [
     "What does this function return?",
-    "Explain how this module works"
+    "Explain how this module works",
+    "Summarise what changed in this repo over the last month",
+    "What is the difference between a rebase and a merge?",
+    "Why is this test flaky? Just explain, do not change anything",
+    "Scaffold a new agentic RAG app",
+    "Draft an email to the team about Friday's release",
+    "Which Python versions does this project support?"
   ],
   "expectations": [
     "Plans/brainstorms before coding for non-trivial work (via the superpowers plugin), answering from the codebase what the codebase can answer",

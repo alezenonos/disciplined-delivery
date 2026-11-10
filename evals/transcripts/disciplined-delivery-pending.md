@@ -35,6 +35,12 @@ For each `negatives` prompt: confirm the skill did **not** trigger.
 |-----------------|-------------|-------|
 | What does this function return? | yes / no | |
 | Explain how this module works | yes / no | |
+| Summarise what changed in this repo over the last month | yes / no | |
+| What is the difference between a rebase and a merge? | yes / no | |
+| Why is this test flaky? Just explain, do not change anything | yes / no | |
+| Scaffold a new agentic RAG app | yes / no | |
+| Draft an email to the team about Friday's release | yes / no | |
+| Which Python versions does this project support? | yes / no | |
 
 ## Expectations
 
