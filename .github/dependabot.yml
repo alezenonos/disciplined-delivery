@@ -11,3 +11,12 @@ updates:
     groups:
       github-actions:
         patterns: ["*"]
+  # Keep the pinned dev tools (requirements-dev.txt) current the same way.
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-tools:
+        patterns: ["*"]

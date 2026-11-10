@@ -7,6 +7,8 @@ commit merged with its base when asked.
 from __future__ import annotations
 
 import os
+import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -15,6 +17,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[1]
 ASSET = REPO / "skills" / "disciplined-delivery" / "assets" / "ci_local.sh"
 WRAPPER = REPO / "scripts" / "ci_local.sh"
+CHECKS = REPO / "scripts" / "checks.sh"
 
 GIT_ENV = {
     "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
@@ -145,11 +148,87 @@ def test_a_missing_command_is_a_usage_error(repo: Path) -> None:
 
 def test_this_repo_wraps_the_asset_with_its_own_checks() -> None:
     # Not run here: the wrapper runs this suite, which would run the wrapper. A smoke check.
-    assert os.access(WRAPPER, os.X_OK)
+    assert os.access(WRAPPER, os.X_OK) and os.access(CHECKS, os.X_OK)
     text = WRAPPER.read_text(encoding="utf-8")
     assert "assets/ci_local.sh" in text
-    # Every step of .github/workflows/ci.yml, so a PASS here means what CI's PASS means.
-    for check in ("ruff check", "pytest", "examples/roman-numerals", "--cov-fail-under=100",
-                  "validate_manifests.py", "check_evals.py", "shellcheck", "compileall",
-                  "created: 0 file(s)"):
-        assert check in text, check
+    assert "scripts/checks.sh" in text
+
+
+_RUN = re.compile(r"^\s*(?:-\s+)?run:\s*(.*)$")
+
+
+def _run_commands(workflow: str) -> list[str]:
+    """Every ``run:`` command of a workflow; a multi-line block is refused, not skipped."""
+    commands = []
+    for line in workflow.splitlines():
+        match = _RUN.match(line)
+        if match:
+            assert not match.group(1).startswith(("|", ">")), (
+                "a multi-line run block hides commands from this test: "
+                f"call scripts/checks.sh instead ({line.strip()})"
+            )
+            commands.append(match.group(1).strip())
+    return commands
+
+
+def test_run_commands_are_found_however_the_step_is_written() -> None:
+    # `- run: x` (no name) is the form most likely to be added by hand.
+    assert _run_commands("steps:\n  - name: a\n    run: one\n  - run: two\n") == ["one", "two"]
+    for block in ("run: |", "- run: |-", "run: >+"):
+        with pytest.raises(AssertionError):
+            _run_commands(f"    {block}\n      hidden\n")
+
+
+def test_ci_and_local_ci_run_the_same_checks() -> None:
+    # One list of checks (scripts/checks.sh), so a PASS locally means what CI's PASS means:
+    # the workflow may install tools, and otherwise only calls a group of that script.
+    commands = _run_commands((REPO / ".github" / "workflows" / "ci.yml").read_text("utf-8"))
+    assert len(commands) >= 5, "extraction looks broken"
+    installs = ("pip install -r requirements-dev.txt", "npm install -g ")
+    groups = set()
+    for command in commands:
+        if command.startswith(installs):
+            continue
+        assert command.startswith("scripts/checks.sh "), f"a check outside checks.sh: {command}"
+        groups.add(command.split()[1])
+    script = CHECKS.read_text(encoding="utf-8")
+    declared = re.search(r"^CHECK_GROUPS=\((.*)\)$", script, re.MULTILINE)
+    assert declared, "extraction looks broken"
+    assert groups == set(declared.group(1).split()), "CI must run every group local CI runs"
+
+
+def test_every_tool_ci_installs_is_pinned() -> None:
+    commands = _run_commands((REPO / ".github" / "workflows" / "ci.yml").read_text("utf-8"))
+    npm = [c for c in commands if c.startswith("npm install -g ")]
+    assert npm, "extraction looks broken"
+    for command in npm:
+        assert re.search(r"@\d+\.\d+\.\d+$", command), f"not pinned to a version: {command}"
+    tools = [
+        line for line in (REPO / "requirements-dev.txt").read_text("utf-8").splitlines()
+        if line and not line.startswith("#")
+    ]
+    assert len(tools) >= 3, "extraction looks broken"
+    for tool in tools:
+        assert re.fullmatch(r"[\w.-]+==[\w.]+", tool), f"not pinned to a version: {tool}"
+
+
+def test_the_manifests_group_fails_without_the_claude_cli(tmp_path: Path) -> None:
+    # A check that could not run must not end in a PASS: with no CLI the group fails and says
+    # how to get it, whatever environment variables are set.
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    for tool in ("python3", "shellcheck", "sed", "dirname", "env", "bash"):
+        found = shutil.which(tool)
+        assert found, tool
+        (bin_dir / tool).symlink_to(found)
+    env = {k: v for k, v in os.environ.items() if k != "CI"}
+    out = subprocess.run([str(CHECKS), "manifests"], capture_output=True, text=True,
+                         env={**env, "PATH": str(bin_dir)})
+    assert out.returncode != 0
+    assert "claude plugin validate" in out.stderr and "npm install -g" in out.stderr
+
+
+def test_checks_script_rejects_an_unknown_group() -> None:
+    out = subprocess.run([str(CHECKS), "no-such-group"], capture_output=True, text=True)
+    assert out.returncode == 2
+    assert "unknown group: no-such-group" in out.stderr

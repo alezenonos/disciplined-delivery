@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+# The checks live in scripts/checks.sh, one group per job, so local CI (scripts/ci_local.sh)
+# runs exactly what runs here. A step here installs tools or calls that script, nothing else
+# (tests/test_ci_local.py enforces it).
 jobs:
   quality:
     name: Lint & unit tests (py${{ matrix.python-version }})
@@ -15,25 +18,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dev tools
-        run: pip install ruff pytest pytest-cov
-      - name: Lint (ruff)
-        run: ruff check .
-      - name: Unit tests (pytest) with coverage gate
-        # COVERAGE_PROCESS_START makes coverage instrument the subprocesses the
-        # tests spawn; the threshold lives in [tool.coverage.report] in pyproject.
-        env:
-          COVERAGE_PROCESS_START: ${{ github.workspace }}/pyproject.toml
-        run: pytest -q --cov --cov-report=term-missing
-      - name: Example tests with coverage gate
-        run: pytest -q --cov=roman --cov=cli --cov-report=term-missing --cov-fail-under=100
-        working-directory: examples/roman-numerals
+        run: pip install -r requirements-dev.txt
+      - name: Lint (ruff), unit tests and example tests with their coverage gates
+        run: scripts/checks.sh quality
 
   manifests:
     name: Validate manifests, skills & shell
@@ -42,13 +36,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.11"
-      - name: Validate plugin/marketplace manifests and skill frontmatter
-        run: python scripts/validate_manifests.py
-      - name: Validate skill eval cases
-        run: python scripts/check_evals.py
-      - name: Shellcheck the shell scripts
-        run: shellcheck install.sh scripts/ci_local.sh skills/disciplined-delivery/assets/ci_local.sh
+          python-version: "3.13"
+      - name: Install dev tools
+        run: pip install -r requirements-dev.txt
+      # Pinned like every other tool. Dependabot cannot see a version in a run line, so this
+      # pin is bumped by hand: check `npm view @anthropic-ai/claude-code version` when cutting
+      # a release. (2.1.322 was the latest on 2026-11-10.)
+      - name: Install the Claude Code CLI (for `claude plugin validate`)
+        run: npm install -g @anthropic-ai/claude-code@2.1.322
+      - name: Manifests, skill frontmatter, eval cases, shellcheck, claude plugin validate
+        run: scripts/checks.sh manifests
 
   scaffold:
     name: Scaffold generator self-test (py${{ matrix.python-version }})
@@ -56,22 +53,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Generate an app from the scaffold
-        run: python skills/scaffold-agentic-app/scaffold.py "$RUNNER_TEMP/app"
-      - name: Compile generated stubs
-        run: python -m compileall -q "$RUNNER_TEMP/app"
-      - name: Re-run must be idempotent (nothing overwritten)
-        run: |
-          python skills/scaffold-agentic-app/scaffold.py "$RUNNER_TEMP/app" | tee rerun.log
-          grep -q "created: 0 file(s)" rerun.log
-      - name: Install generated app deps and run its tests
-        run: |
-          cd "$RUNNER_TEMP/app"
-          pip install -r requirements.txt
-          pytest -q
+      - name: Generate an app, compile it, re-run idempotently, lint and test it
+        run: scripts/checks.sh scaffold

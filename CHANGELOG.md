@@ -77,8 +77,15 @@ All notable changes to this project are documented here. The format is based on
   tautologies; pin the wiring, not the value), **fail-fast configuration with no dead knobs**
   (unknown keys rejected; never add an option nothing reads), **rot-prone external pins**, and
   **read-only vendor/partner-owned inputs**.
+- `scripts/checks.sh`: this repo's checks in one script, in groups. CI's jobs and
+  `scripts/ci_local.sh` both call it, and a test fails if the workflow runs a check outside it,
+  so the two cannot drift. `requirements-dev.txt` pins the tools it needs and Dependabot keeps
+  them current.
+- CI and local CI now run **`claude plugin validate .`**, the authoritative manifest check that
+  was only ever run by hand, with the CLI pinned in the workflow.
 
 ### Changed
+- CI tests **Python 3.11–3.14** (3.10 reached end of life in October 2026).
 - `disciplined-delivery`: the **PR template is now enforced by a check**, not only required by
   prose, and PR bodies must carry the known limits; a gate must render in an enforcing surface
   (template checkbox worded for every case, CI check, or refusing script), kept in proportion

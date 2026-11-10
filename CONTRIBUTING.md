@@ -21,9 +21,8 @@ These live in one place each; read them, don't expect this file to restate them:
 1. **One branch = one focused change.** No bundling unrelated changes.
 2. **Green on a clean checkout of the commit** (reproduce CI; the working tree does not count):
    ```bash
-   pip install ruff pytest pytest-cov
+   pip install -r requirements-dev.txt
    scripts/ci_local.sh --merge-preview      # CI's checks in a temp checkout of HEAD merged with main
-   python skills/scaffold-agentic-app/scaffold.py /tmp/app && python -m compileall -q /tmp/app
    ```
    Quote the SHA it prints under "How was it tested?" in the PR.
 3. **Run `code-review-skill` over the diff** and resolve blocking/important findings.
@@ -60,6 +59,11 @@ The project follows [Semantic Versioning](https://semver.org/) and keeps a
    ```
    Consumers resolve versioned dependencies against these tags. Every user-facing change
    should add a `CHANGELOG.md` entry under `Unreleased` in the same PR.
+
+When cutting a release, also check the Claude Code CLI pin in
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) against
+`npm view @anthropic-ai/claude-code version` and bump it if it is behind: Dependabot cannot
+see a version in a workflow's `run:` line.
 
 ## License
 
